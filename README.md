@@ -39,7 +39,11 @@ If `VITE_FIREBASE_*` values are missing, empty, or still placeholders, the app n
 
 Firestore workout sync
 
-Workout entries now sync through Cloud Firestore for logged-in users under `users/{userId}/workoutEntries/{entryId}`. Body measurements remain local-only.
+Workout entries now sync through Cloud Firestore for logged-in users under `users/{userId}/workoutEntries/{entryId}`.
 
-Deploy Firestore rules that restrict access to the authenticated owner's workout path before relying on shared workout sync across devices.
+Firestore body sync
+
+Body measurements now sync through Cloud Firestore for logged-in users under `users/{userId}/bodyMeasurements/{measurementId}`.
+
+Deploy Firestore rules that restrict access to the authenticated owner's workout and body paths before relying on shared sync across devices. The Settings page includes small one-time import helpers for existing local workout and body records.
 

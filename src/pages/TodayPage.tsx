@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getWorkoutDateKey, subscribeToEntries } from '../services/workoutStorage'
-import { getAllMeasurements } from '../services/bodyMeasurementStorage'
+import { subscribeToMeasurements } from '../services/bodyMeasurementStorage'
 import exercises from '../data/exercises'
+import type { BodyMeasurement } from '../types/body'
 import type { WorkoutEntry } from '../types/workout'
 
 function toDateKey(date: Date) {
@@ -71,10 +72,14 @@ function buildPerformanceOverview(entries: WorkoutEntry[]) {
 export default function TodayPage() {
     const navigate = useNavigate()
     const [entries, setEntries] = useState<WorkoutEntry[]>([])
-    const measurements = useMemo(() => getAllMeasurements(), [])
+    const [measurements, setMeasurements] = useState<BodyMeasurement[]>([])
 
     useEffect(() => {
         return subscribeToEntries(setEntries)
+    }, [])
+
+    useEffect(() => {
+        return subscribeToMeasurements(setMeasurements)
     }, [])
 
     const latestMeasurement = measurements[0]

@@ -56,4 +56,4 @@ Navigation
 - Nested/detail navigation should prefer router history (`navigate(-1)`) with explicit fallbacks for direct opens.
 
 My body details
-- `src/pages/MyBodyPage.tsx` supports adding, editing, and deleting local body measurements. Latest measurement summary is shown at the top, history below (newest first).
+- `src/pages/MyBodyPage.tsx` supports adding, editing, and deleting body measurements. Logged-in users sync through Firestore; localStorage remains only as fallback/import source. Latest measurement summary is shown at the top, history below (newest first).

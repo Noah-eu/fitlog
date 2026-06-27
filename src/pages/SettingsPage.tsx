@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { getLocalBodyMeasurements, importLocalBodyMeasurementsToCloud } from '../services/bodyMeasurementStorage'
 import { getLocalWorkoutEntries, importLocalWorkoutEntriesToCloud } from '../services/workoutStorage'
 
 export default function SettingsPage() {
@@ -7,7 +8,11 @@ export default function SettingsPage() {
     const [importMessage, setImportMessage] = useState<string | null>(null)
     const [importError, setImportError] = useState<string | null>(null)
     const [importing, setImporting] = useState(false)
+    const [bodyImportMessage, setBodyImportMessage] = useState<string | null>(null)
+    const [bodyImportError, setBodyImportError] = useState<string | null>(null)
+    const [bodyImporting, setBodyImporting] = useState(false)
     const localWorkoutCount = useMemo(() => getLocalWorkoutEntries().length, [])
+    const localBodyCount = useMemo(() => getLocalBodyMeasurements().length, [])
 
     async function handleImport() {
         setImportError(null)
@@ -28,6 +33,25 @@ export default function SettingsPage() {
         }
     }
 
+    async function handleBodyImport() {
+        setBodyImportError(null)
+        setBodyImportMessage(null)
+        setBodyImporting(true)
+
+        try {
+            const importedCount = await importLocalBodyMeasurementsToCloud()
+            setBodyImportMessage(
+                importedCount > 0
+                    ? `Do cloudu bylo nahráno ${importedCount} lokálních měření.`
+                    : 'V tomto zařízení nejsou žádná lokální měření k importu.',
+            )
+        } catch (error) {
+            setBodyImportError(error instanceof Error ? error.message : 'Import lokálních měření selhal.')
+        } finally {
+            setBodyImporting(false)
+        }
+    }
+
     return (
         <div className="page">
             <h1>Nastavení</h1>
@@ -41,6 +65,14 @@ export default function SettingsPage() {
                     </button>
                     {importMessage ? <p style={{ marginTop: 8 }}>{importMessage}</p> : null}
                     {importError ? <div className="form-error" style={{ marginTop: 8 }}>{importError}</div> : null}
+                </div>
+                <div style={{ marginTop: 8 }}>
+                    <div><strong>Lokální měření:</strong> {localBodyCount}</div>
+                    <button onClick={handleBodyImport} disabled={bodyImporting} style={{ marginTop: 8 }}>
+                        {bodyImporting ? 'Importuji...' : 'Importovat lokální měření do cloudu'}
+                    </button>
+                    {bodyImportMessage ? <p style={{ marginTop: 8 }}>{bodyImportMessage}</p> : null}
+                    {bodyImportError ? <div className="form-error" style={{ marginTop: 8 }}>{bodyImportError}</div> : null}
                 </div>
                 <div style={{ marginTop: 8 }}>
                     <button onClick={() => logout()}>Odhlásit</button>

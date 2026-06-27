@@ -43,7 +43,7 @@ Workout entry storage
 - Ownership: only the authenticated user may read or write entries under their own `userId` path.
 - Local fallback: workout entries may remain in browser localStorage only when Firebase Auth/Firestore is unavailable, or until the user manually imports local data into cloud storage.
 
-Local body measurement shape (stored in browser/local storage for MVP):
+Body measurement shape:
 - id: string
 - date: string (ISO date)
 - bodyWeight?: number
@@ -54,6 +54,11 @@ Local body measurement shape (stored in browser/local storage for MVP):
 - note?: string
 - createdAt: string (ISO timestamp)
 - updatedAt?: string (ISO timestamp)
+
+Body measurement storage
+- Firestore path: `users/{userId}/bodyMeasurements/{measurementId}`
+- Ownership: only the authenticated user may read or write measurements under their own `userId` path.
+- Local fallback: body measurements may remain in browser localStorage only when Firebase Auth/Firestore is unavailable, or until the user manually imports local data into cloud storage.
 
 - `users/{userId}/workoutEntries/{entryId}`
   - id: string
@@ -67,12 +72,19 @@ Local body measurement shape (stored in browser/local storage for MVP):
   - createdAt: string
   - updatedAt?: string
 
-- `users/{userId}/measurements/{measurementId}`
+- `users/{userId}/bodyMeasurements/{measurementId}`
   - id: string
-  - date: timestamp
+  - date: string (stored as ISO date-time)
   - bodyWeight?: number
-  - measurements?: map (waist, chest, arm, leg...)
+  - chest?: number
+  - waist?: number
+  - biceps?: number
+  - thighs?: number
+  - note?: string
+  - createdAt: string
+  - updatedAt?: string
 
 Notes
 - Storing `exercises` as a global collection keeps templates separate from personal progress.
 - Workout entries stay separate from exercise templates and are always scoped by `userId`.
+- Body measurements are personal records and are always scoped by `userId`.

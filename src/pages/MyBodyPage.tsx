@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import type { BodyMeasurement } from '../types/body'
-import { getAllMeasurements, saveMeasurement, updateMeasurement, deleteMeasurement } from '../services/bodyMeasurementStorage'
+import { deleteMeasurement, saveMeasurement, subscribeToMeasurements, updateMeasurement } from '../services/bodyMeasurementStorage'
 
 function todayISODate() {
     const t = new Date()
@@ -20,9 +20,10 @@ export default function MyBodyPage() {
     const [thighs, setThighs] = useState<number | ''>('')
     const [note, setNote] = useState<string>('')
     const [editingId, setEditingId] = useState<string | null>(null)
+    const [saveError, setSaveError] = useState<string | null>(null)
 
     useEffect(() => {
-        setMeasurements(getAllMeasurements())
+        return subscribeToMeasurements(setMeasurements)
     }, [])
 
     function resetForm() {
@@ -36,10 +37,26 @@ export default function MyBodyPage() {
         setEditingId(null)
     }
 
-    function handleSubmit(e: React.FormEvent) {
+    async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
-        if (editingId) {
-            const updated = updateMeasurement(editingId, {
+        setSaveError(null)
+
+        try {
+            if (editingId) {
+                await updateMeasurement(editingId, {
+                    date: new Date(date).toISOString(),
+                    bodyWeight: typeof bodyWeight === 'number' ? bodyWeight : undefined,
+                    chest: typeof chest === 'number' ? chest : undefined,
+                    waist: typeof waist === 'number' ? waist : undefined,
+                    biceps: typeof biceps === 'number' ? biceps : undefined,
+                    thighs: typeof thighs === 'number' ? thighs : undefined,
+                    note,
+                })
+                resetForm()
+                return
+            }
+
+            await saveMeasurement({
                 date: new Date(date).toISOString(),
                 bodyWeight: typeof bodyWeight === 'number' ? bodyWeight : undefined,
                 chest: typeof chest === 'number' ? chest : undefined,
@@ -48,22 +65,10 @@ export default function MyBodyPage() {
                 thighs: typeof thighs === 'number' ? thighs : undefined,
                 note,
             })
-            if (updated) setMeasurements(getAllMeasurements())
             resetForm()
-            return
+        } catch (error) {
+            setSaveError(error instanceof Error ? error.message : 'Nepodařilo se uložit měření.')
         }
-
-        const saved = saveMeasurement({
-            date: new Date(date).toISOString(),
-            bodyWeight: typeof bodyWeight === 'number' ? bodyWeight : undefined,
-            chest: typeof chest === 'number' ? chest : undefined,
-            waist: typeof waist === 'number' ? waist : undefined,
-            biceps: typeof biceps === 'number' ? biceps : undefined,
-            thighs: typeof thighs === 'number' ? thighs : undefined,
-            note,
-        })
-        setMeasurements((s) => [saved, ...s])
-        resetForm()
     }
 
     function startEdit(m: BodyMeasurement) {
@@ -78,11 +83,15 @@ export default function MyBodyPage() {
         window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
-    function handleDelete(id: string) {
+    async function handleDelete(id: string) {
         if (!confirm('Smazat toto měření?')) return
-        const ok = deleteMeasurement(id)
-        if (!ok) return
-        setMeasurements(getAllMeasurements())
+        setSaveError(null)
+
+        try {
+            await deleteMeasurement(id)
+        } catch (error) {
+            setSaveError(error instanceof Error ? error.message : 'Nepodařilo se smazat měření.')
+        }
     }
 
     const latest = measurements[0]
@@ -124,6 +133,7 @@ export default function MyBodyPage() {
                     <button type="submit" className="primary">{editingId ? 'Uložit' : 'Přidat měření'}</button>
                     {editingId && <button type="button" onClick={resetForm}>Zrušit</button>}
                 </div>
+                {saveError ? <div className="form-error">{saveError}</div> : null}
             </form>
 
             {latest && (
