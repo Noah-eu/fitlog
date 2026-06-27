@@ -35,7 +35,7 @@ export default function TodayPage() {
             {(!latestEntry && !latestMeasurement) ? (
                 <div>
                     <p>Žádná data zatím. Začněte záznamem cvičení nebo měřením těla.</p>
-                    <div style={{display:'flex',gap:8,marginTop:12}}>
+                    <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
                         <button onClick={() => navigate('/exercises')} className="primary">Začít cvičit</button>
                         <button onClick={() => navigate('/history')}>Zobrazit deník</button>
                         <button onClick={() => navigate('/body')}>Přidat měření</button>
@@ -72,12 +72,12 @@ export default function TodayPage() {
 
                         <section className="card">
                             <h3>Tento týden</h3>
-                            <div style={{fontSize:20,fontWeight:600}}>{weekCount}</div>
+                            <div style={{ fontSize: 20, fontWeight: 600 }}>{weekCount}</div>
                             <div className="small">záznamů v posledních 7 dnech</div>
                         </section>
                     </div>
 
-                    <div style={{display:'flex',gap:8,marginTop:12}}>
+                    <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
                         <button onClick={() => navigate('/exercises')} className="primary">Začít cvičit</button>
                         <button onClick={() => navigate('/history')}>Zobrazit deník</button>
                         <button onClick={() => navigate('/body')}>Přidat měření</button>

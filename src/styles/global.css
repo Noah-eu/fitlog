@@ -100,10 +100,29 @@ body {
     margin-top: 12px
 }
 
-.cards{display:flex;flex-direction:column;gap:12px}
-.card{background:#fff;border-radius:8px;padding:12px;box-shadow:0 1px 0 rgba(16,24,40,0.04)}
-.muted{color:#64748b;font-size:13px}
-.small{font-size:13px;color:#475569;margin-top:6px}
+.cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px
+}
+
+.card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 1px 0 rgba(16, 24, 40, 0.04)
+}
+
+.muted {
+    color: #64748b;
+    font-size: 13px
+}
+
+.small {
+    font-size: 13px;
+    color: #475569;
+    margin-top: 6px
+}
 
 .exercise-card {
     display: flex;
