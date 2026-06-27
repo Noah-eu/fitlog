@@ -349,7 +349,7 @@ button.primary {
     margin-top: 16px;
 }
 
-.setup-card p + p {
+.setup-card p+p {
     margin-top: 10px;
 }
 

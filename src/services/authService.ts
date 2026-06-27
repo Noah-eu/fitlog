@@ -11,7 +11,7 @@ const runtimeConfigErrorCodes = new Set([
 function createUnavailableAuthError() {
     const error = new Error(
         getFirebaseConfigError() ??
-            'Firebase Auth není dostupný. Zkontrolujte .env.local a Netlify Environment variables.'
+        'Firebase Auth není dostupný. Zkontrolujte .env.local a Netlify Environment variables.'
     ) as Error & { code: string }
     error.code = 'auth/config-unavailable'
     return error
@@ -34,26 +34,26 @@ export function getAuthSetupError(error?: unknown) {
 }
 
 export async function signIn(email: string, password: string) {
-        if (!auth) throw createUnavailableAuthError()
-        return signInWithEmailAndPassword(auth, email, password)
+    if (!auth) throw createUnavailableAuthError()
+    return signInWithEmailAndPassword(auth, email, password)
 }
 
 export async function signOutUser() {
-        if (!auth) return
-        return signOut(auth)
+    if (!auth) return
+    return signOut(auth)
 }
 
 export function onAuthChanged(cb: (user: User | null) => void, onError?: (error: unknown) => void) {
-        if (!auth) {
-                cb(null)
-                return () => {}
-        }
+    if (!auth) {
+        cb(null)
+        return () => { }
+    }
 
-        try {
-                return onAuthStateChanged(auth, cb, onError)
-        } catch (error) {
-                onError?.(error)
-                cb(null)
-                return () => {}
-        }
+    try {
+        return onAuthStateChanged(auth, cb, onError)
+    } catch (error) {
+        onError?.(error)
+        cb(null)
+        return () => { }
+    }
 }
