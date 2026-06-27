@@ -6,18 +6,20 @@ import ExercisesPage from './pages/ExercisesPage'
 import WorkoutHistoryPage from './pages/WorkoutHistoryPage'
 import MyBodyPage from './pages/MyBodyPage'
 import SettingsPage from './pages/SettingsPage'
+import ExerciseDetailPage from './pages/ExerciseDetailPage'
 
 export default function App() {
-  return (
-    <Routes>
-      <Route path="/" element={<AppShell />}>
-        <Route index element={<TodayPage />} />
-        <Route path="exercises" element={<ExercisesPage />} />
-        <Route path="history" element={<WorkoutHistoryPage />} />
-        <Route path="body" element={<MyBodyPage />} />
-        <Route path="settings" element={<SettingsPage />} />
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  )
+    return (
+        <Routes>
+            <Route path="/" element={<AppShell />}>
+                <Route index element={<TodayPage />} />
+                <Route path="exercises" element={<ExercisesPage />} />
+                <Route path="exercises/:id" element={<ExerciseDetailPage />} />
+                <Route path="history" element={<WorkoutHistoryPage />} />
+                <Route path="body" element={<MyBodyPage />} />
+                <Route path="settings" element={<SettingsPage />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+    )
 }
