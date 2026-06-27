@@ -33,3 +33,13 @@ Primary screens and key components
 Design notes
 - Mobile-first responsive layout; components designed for thumb reach and compact lists.
 - Keep screens minimal and focused for quick logging.
+
+Current pages (scaffolded)
+- `src/pages/TodayPage.tsx` — Today / Dashboard
+- `src/pages/ExercisesPage.tsx` — Exercises list
+- `src/pages/WorkoutHistoryPage.tsx` — Workout history (Deník)
+- `src/pages/MyBodyPage.tsx` — My body
+- `src/pages/SettingsPage.tsx` — Settings
+
+Navigation
+- Top-level routing is in `src/App.tsx` and the mobile bottom nav is `src/components/BottomNav.tsx`.

@@ -11,10 +11,26 @@ Primary documents (read these first)
 5. docs/ai-context/firebase.md
 6. docs/ai-context/validation.md
 
+Local source map (read these next when editing UI or routing)
+- src/main.tsx
+- src/App.tsx
+- src/components/AppShell.tsx
+- src/components/BottomNav.tsx
+- src/pages/TodayPage.tsx
+- src/pages/ExercisesPage.tsx
+- src/pages/WorkoutHistoryPage.tsx
+- src/pages/MyBodyPage.tsx
+- src/pages/SettingsPage.tsx
+- src/styles/global.css
+
 How Copilot should operate
 - Always read APP_PLAN.md and the listed docs before making changes.
 - Do not scan the entire repository unless the documented paths are missing or insufficient.
 - If a task requires files outside these paths, request permission before broad scanning.
+
+Quick rules for UI/Scaffold edits
+- When changing the UI shell or routing, update this file and `docs/ai-context/*` to keep the source map accurate.
+- Keep feature scope limited to the MVP in APP_PLAN.md; do not add Firebase, charts, auth, or AI in UI-only edits.
 
 Key rules to enforce in code and design
 - Personal data must always be stored and queried with an explicit `userId` key.

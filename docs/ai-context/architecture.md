@@ -18,3 +18,15 @@ Security & constraints
 
 Extensibility
 - Keep architecture modular: separate `exercises` (global templates) from `user` namespaces.
+
+Current scaffold
+- The repository now contains a small Vite + React + TypeScript scaffold (UI only).
+- Key front-end files:
+	- `src/main.tsx` — app bootstrap
+	- `src/App.tsx` — router and top-level routes
+	- `src/components/AppShell.tsx` — header/content/shell
+	- `src/components/BottomNav.tsx` — mobile bottom navigation
+	- `src/pages/*` — placeholder pages for MVP screens
+	- `src/styles/global.css` — mobile-first base styles
+
+Note: No backend (Firebase) is wired yet. Keep server integrations out of UI-only PRs unless requested.
