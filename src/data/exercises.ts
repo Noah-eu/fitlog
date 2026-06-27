@@ -478,7 +478,7 @@ const exercises: Exercise[] = [
         shortDescription: 'Klečící přítahy na kladce pro břišní svaly.',
         instructions: 'Klekněte před kladku, držte lano u hlavy a přitahujte trup směrem k zemi pomocí břišního svalstva.',
         commonMistakes: ['Táhnutí paží místo aktivace břicha', 'Příliš rychlé provedení'],
-        imageUrl: '',
+        imageUrl: '/images/exercises/bricho.v.klece.png',
         recommendedReps: '10-15',
         recommendedSets: '3-4',
     },
