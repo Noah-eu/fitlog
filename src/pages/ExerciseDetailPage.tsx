@@ -101,7 +101,9 @@ export default function ExerciseDetailPage() {
             <BackButton fallbackTo="/exercises" />
             <h1>{ex.name}</h1>
             <div className="exercise-detail">
-                <div className="thumb large" />
+                <div className="thumb large">
+                    {ex.imageUrl ? <img src={ex.imageUrl} alt={ex.name} /> : null}
+                </div>
                 <div className="meta">
                     <div className="cat">{ex.category}</div>
                     <p><strong>Primární svaly:</strong> {ex.primaryMuscles.join(', ')}</p>

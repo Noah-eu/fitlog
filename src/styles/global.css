@@ -190,6 +190,19 @@ body {
     border-radius: 10px
 }
 
+.exercise-card .thumb,
+.exercise-detail .thumb {
+    overflow: hidden;
+}
+
+.exercise-card .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 10px;
+}
+
 .exercise-card .meta {
     flex: 1
 }
@@ -221,6 +234,15 @@ body {
     height: 160px;
     background: linear-gradient(135deg, rgba(225, 29, 47, 0.7), rgba(242, 194, 48, 0.55));
     border-radius: 14px
+}
+
+.exercise-detail .thumb.large img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    border-radius: 14px;
+    background: var(--surface-2);
 }
 
 .exercise-detail .meta {
