@@ -142,41 +142,41 @@ export default function WorkoutHistoryPage() {
                 ) : (
                     <ul className="entry-list">
                         {selectedDayEntries.map((en) => (
-                        <li key={en.id} className="entry-item">
-                            <div className="entry-top">
-                                <div className="entry-title">{nameFor(en.exerciseId)}</div>
-                                <div className="entry-date">{new Date(en.createdAt).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}</div>
-                            </div>
-                            {editingId === en.id ? (
-                                <div className="edit-form">
-                                    <label>Datum<input type="date" value={editDate} onChange={(ev) => setEditDate(ev.target.value)} /></label>
-                                    <label>Váha<input type="number" value={editWeight as any} onChange={(ev) => setEditWeight(ev.target.value === '' ? '' : Number(ev.target.value))} /></label>
-                                    <label>Opakování<input type="number" value={editReps as any} onChange={(ev) => setEditReps(ev.target.value === '' ? '' : Number(ev.target.value))} /></label>
-                                    <label>Série<input type="number" value={editSets as any} onChange={(ev) => setEditSets(ev.target.value === '' ? '' : Number(ev.target.value))} /></label>
-                                    <label>Obtížnost
-                                        <select value={editDifficulty} onChange={(ev) => setEditDifficulty(ev.target.value as any)}>
-                                            <option value="lehké">lehké</option>
-                                            <option value="akorát">akorát</option>
-                                            <option value="těžké">těžké</option>
-                                        </select>
-                                    </label>
-                                    <label>Poznámka<textarea value={editNote} onChange={(ev) => setEditNote(ev.target.value)} /></label>
-                                    <div className="edit-actions">
-                                        <button onClick={() => saveEdit(en.id)}>Uložit</button>
-                                        <button onClick={cancelEdit}>Zrušit</button>
-                                    </div>
+                            <li key={en.id} className="entry-item">
+                                <div className="entry-top">
+                                    <div className="entry-title">{nameFor(en.exerciseId)}</div>
+                                    <div className="entry-date">{new Date(en.createdAt).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}</div>
                                 </div>
-                            ) : (
-                                <>
-                                    <div className="entry-meta">{en.sets ?? '-'}×{en.reps ?? '-'} • {en.weight ?? '-'} kg • {en.difficulty ?? '-'}</div>
-                                    {en.note && <div className="entry-note">{en.note}</div>}
-                                    <div className="entry-actions">
-                                        <button onClick={() => startEdit(en)}>Upravit</button>
-                                        <button onClick={() => handleDelete(en.id)}>Smazat</button>
+                                {editingId === en.id ? (
+                                    <div className="edit-form">
+                                        <label>Datum<input type="date" value={editDate} onChange={(ev) => setEditDate(ev.target.value)} /></label>
+                                        <label>Váha<input type="number" value={editWeight as any} onChange={(ev) => setEditWeight(ev.target.value === '' ? '' : Number(ev.target.value))} /></label>
+                                        <label>Opakování<input type="number" value={editReps as any} onChange={(ev) => setEditReps(ev.target.value === '' ? '' : Number(ev.target.value))} /></label>
+                                        <label>Série<input type="number" value={editSets as any} onChange={(ev) => setEditSets(ev.target.value === '' ? '' : Number(ev.target.value))} /></label>
+                                        <label>Obtížnost
+                                            <select value={editDifficulty} onChange={(ev) => setEditDifficulty(ev.target.value as any)}>
+                                                <option value="lehké">lehké</option>
+                                                <option value="akorát">akorát</option>
+                                                <option value="těžké">těžké</option>
+                                            </select>
+                                        </label>
+                                        <label>Poznámka<textarea value={editNote} onChange={(ev) => setEditNote(ev.target.value)} /></label>
+                                        <div className="edit-actions">
+                                            <button onClick={() => saveEdit(en.id)}>Uložit</button>
+                                            <button onClick={cancelEdit}>Zrušit</button>
+                                        </div>
                                     </div>
-                                </>
-                            )}
-                        </li>
+                                ) : (
+                                    <>
+                                        <div className="entry-meta">{en.sets ?? '-'}×{en.reps ?? '-'} • {en.weight ?? '-'} kg • {en.difficulty ?? '-'}</div>
+                                        {en.note && <div className="entry-note">{en.note}</div>}
+                                        <div className="entry-actions">
+                                            <button onClick={() => startEdit(en)}>Upravit</button>
+                                            <button onClick={() => handleDelete(en.id)}>Smazat</button>
+                                        </div>
+                                    </>
+                                )}
+                            </li>
                         ))}
                     </ul>
                 )}

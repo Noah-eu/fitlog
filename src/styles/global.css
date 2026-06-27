@@ -704,6 +704,7 @@ button:not(.primary):not(.back-button) {
 }
 
 @media (max-width: 560px) {
+
     .dashboard-hero,
     .section-heading,
     .performance-head {

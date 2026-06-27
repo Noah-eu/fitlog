@@ -136,7 +136,7 @@ export default function TodayPage() {
                                         </div>
                                         <div>
                                             <span>Nejvyšší váha</span>
-                                            <strong>{item.bestWeight ?? '-' } kg</strong>
+                                            <strong>{item.bestWeight ?? '-'} kg</strong>
                                         </div>
                                     </div>
 
