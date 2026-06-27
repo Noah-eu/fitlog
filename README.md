@@ -47,3 +47,9 @@ Body measurements now sync through Cloud Firestore for logged-in users under `us
 
 Deploy Firestore rules that restrict access to the authenticated owner's workout and body paths before relying on shared sync across devices. The Settings page includes small one-time import helpers for existing local workout and body records.
 
+PWA install
+
+FitLog now exposes a web app manifest and home screen icons built from the existing kettlebell logo. On mobile, open https://fitlog-training.netlify.app and use the browser's `Add to Home Screen` or `Install app` action to install FitLog in standalone mode.
+
+The manifest and icons are served from `public/manifest.webmanifest` and `public/icons/` and stay compatible with the existing Vite + Netlify deployment.
+
