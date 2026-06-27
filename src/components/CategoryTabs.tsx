@@ -11,6 +11,7 @@ export default function CategoryTabs({ categories, value, onChange }: Props) {
         <div className="category-tabs">
             {categories.map((c) => (
                 <button
+                    type="button"
                     key={c}
                     className={c === value ? 'tab active' : 'tab'}
                     onClick={() => onChange(c)}

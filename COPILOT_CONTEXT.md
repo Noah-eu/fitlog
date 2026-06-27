@@ -17,6 +17,7 @@ Local source map (read these next when editing UI or routing)
 - src/components/AppShell.tsx
 - src/components/BackButton.tsx
 - src/components/BottomNav.tsx
+- src/components/WorkoutCalendar.tsx
 - src/pages/TodayPage.tsx
 - src/pages/ExercisesPage.tsx
 - src/pages/WorkoutHistoryPage.tsx
@@ -38,6 +39,7 @@ How Copilot should operate
 Quick rules for UI/Scaffold edits
 - When changing the UI shell or routing, update this file and `docs/ai-context/*` to keep the source map accurate.
 - Keep feature scope limited to the MVP in APP_PLAN.md; do not add Firebase, charts, auth, or AI in UI-only edits.
+- `src/services/workoutStorage.ts` includes local day helpers used by the dashboard and workout calendar; prefer those helpers over ad-hoc date slicing when working with workout dates.
 
 Key rules to enforce in code and design
 - Personal data must always be stored and queried with an explicit `userId` key.

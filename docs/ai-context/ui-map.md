@@ -4,7 +4,9 @@ Primary screens and key components
 
 - Today / Dashboard
  - Today / Dashboard
-  - Summary of today's recorded workout(s): shows latest workout entry (exercise name, date, weight, reps, sets, difficulty)
+  - `Moje výkony` overview for every exercise with saved workout data
+  - Latest performance per exercise (weight, reps, sets, difficulty, date)
+  - Optional best/heaviest recorded weight per exercise
   - Latest body measurement summary (weight, waist, chest, date)
   - Count of workout entries in the last 7 days
   - Quick action buttons: `Cvičení`, `Deník`, `Moje tělo`
@@ -25,7 +27,9 @@ Primary screens and key components
   - Show suggested last weight per exercise
 
 - Workout history
-  - Chronological list, tap to view/edit an entry
+  - Monthly calendar with highlighted workout days
+  - Selected-day list of entries below the calendar
+  - Edit/delete support from the selected-day list
 
 - My body
   - Log body weight and measurements

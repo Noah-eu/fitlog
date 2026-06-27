@@ -2,6 +2,11 @@ import type { WorkoutEntry } from '../types/workout'
 
 const KEY = 'fitlog.workouts.v1'
 
+function compareEntriesDesc(a: WorkoutEntry, b: WorkoutEntry): number {
+    if (a.date !== b.date) return b.date.localeCompare(a.date)
+    return b.createdAt.localeCompare(a.createdAt)
+}
+
 function safeParse(raw: string | null): WorkoutEntry[] {
     if (!raw) return []
     try {
@@ -16,7 +21,15 @@ function safeParse(raw: string | null): WorkoutEntry[] {
 export function getAllEntries(): WorkoutEntry[] {
     if (typeof window === 'undefined') return []
     const raw = localStorage.getItem(KEY)
-    return safeParse(raw).sort((a, b) => (b.createdAt > a.createdAt ? 1 : -1))
+    return safeParse(raw).sort(compareEntriesDesc)
+}
+
+export function getWorkoutDateKey(date: string): string {
+    return date.slice(0, 10)
+}
+
+export function toStoredWorkoutDate(dateKey: string): string {
+    return `${dateKey}T12:00:00.000Z`
 }
 
 export function getEntriesByExercise(exerciseId: string): WorkoutEntry[] {

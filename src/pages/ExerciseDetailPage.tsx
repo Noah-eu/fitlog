@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import exercises from '../data/exercises'
 import type { WorkoutEntry } from '../types/workout'
-import { getEntriesByExercise, saveEntry, updateEntry, deleteEntry } from '../services/workoutStorage'
+import { getEntriesByExercise, saveEntry, updateEntry, deleteEntry, getWorkoutDateKey, toStoredWorkoutDate } from '../services/workoutStorage'
 import BackButton from '../components/BackButton'
 
 function todayISODate() {
@@ -48,7 +48,7 @@ export default function ExerciseDetailPage() {
         if (editingId) {
             const updated = updateEntry(editingId, {
                 exerciseId: ex.id,
-                date: new Date(date).toISOString(),
+                date: toStoredWorkoutDate(date),
                 weight: typeof weight === 'number' && !Number.isNaN(weight) ? weight : undefined,
                 reps: typeof reps === 'number' && !Number.isNaN(reps) ? reps : undefined,
                 sets: typeof setsVal === 'number' && !Number.isNaN(setsVal) ? setsVal : undefined,
@@ -62,7 +62,7 @@ export default function ExerciseDetailPage() {
         } else {
             const entry = saveEntry({
                 exerciseId: ex.id,
-                date: new Date(date).toISOString(),
+                date: toStoredWorkoutDate(date),
                 weight: typeof weight === 'number' && !Number.isNaN(weight) ? weight : undefined,
                 reps: typeof reps === 'number' && !Number.isNaN(reps) ? reps : undefined,
                 sets: typeof setsVal === 'number' && !Number.isNaN(setsVal) ? setsVal : undefined,
@@ -80,7 +80,7 @@ export default function ExerciseDetailPage() {
 
     function startEdit(item: WorkoutEntry) {
         setEditingId(item.id)
-        setDate(item.date.slice(0, 10))
+        setDate(getWorkoutDateKey(item.date))
         setWeight(item.weight ?? '')
         setReps(item.reps ?? '')
         setSetsVal(item.sets ?? '')
@@ -150,7 +150,7 @@ export default function ExerciseDetailPage() {
                     {last && (
                         <div className="last-performance">
                             <h3>Poslední výkon</h3>
-                            <p>{new Date(last.date).toLocaleString()} — {last.sets ?? '-'}×{last.reps ?? '-'} @ {last.weight ?? '-'} kg ({last.difficulty ?? '-'})</p>
+                            <p>{new Date(last.date).toLocaleDateString('cs-CZ')} — {last.sets ?? '-'}×{last.reps ?? '-'} @ {last.weight ?? '-'} kg ({last.difficulty ?? '-'})</p>
                         </div>
                     )}
 
@@ -160,7 +160,7 @@ export default function ExerciseDetailPage() {
                             <ul>
                                 {entries.map((en) => (
                                     <li key={en.id} className="entry-item">
-                                        <div className="entry-meta">{new Date(en.date).toLocaleDateString()} • {en.sets ?? '-'}×{en.reps ?? '-'} • {en.weight ?? '-'} kg</div>
+                                        <div className="entry-meta">{new Date(en.date).toLocaleDateString('cs-CZ')} • {en.sets ?? '-'}×{en.reps ?? '-'} • {en.weight ?? '-'} kg</div>
                                         <div className="entry-note">{en.note}</div>
                                         <div className="entry-actions">
                                             <button onClick={() => startEdit(en)}>Upravit</button>
