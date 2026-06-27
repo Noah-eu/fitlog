@@ -4,6 +4,7 @@ import exercises from '../data/exercises'
 import type { WorkoutEntry } from '../types/workout'
 import { deleteEntry, getWorkoutDateKey, saveEntry, subscribeToEntries, toStoredWorkoutDate, updateEntry } from '../services/workoutStorage'
 import BackButton from '../components/BackButton'
+import ProgressLineChart from '../components/ProgressLineChart'
 
 function todayISODate() {
     const t = new Date()
@@ -11,6 +12,10 @@ function todayISODate() {
     const mm = String(t.getMonth() + 1).padStart(2, '0')
     const dd = String(t.getDate()).padStart(2, '0')
     return `${yyyy}-${mm}-${dd}`
+}
+
+function formatChartDate(date: string) {
+    return new Date(date).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })
 }
 
 export default function ExerciseDetailPage() {
@@ -53,6 +58,16 @@ export default function ExerciseDetailPage() {
     }, [ex.id])
 
     const last = useMemo(() => entries[0], [entries])
+    const chartPoints = useMemo(
+        () => [...entries]
+            .sort((a, b) => a.date.localeCompare(b.date))
+            .map((entry) => ({
+                label: formatChartDate(entry.date),
+                value: entry.weight,
+            }))
+            .filter((point): point is { label: string; value: number } => typeof point.value === 'number' && Number.isFinite(point.value)),
+        [entries],
+    )
 
     async function handleSave(e: React.FormEvent) {
         e.preventDefault()
@@ -178,6 +193,18 @@ export default function ExerciseDetailPage() {
                             <p>{new Date(last.date).toLocaleDateString('cs-CZ')} — {last.sets ?? '-'}×{last.reps ?? '-'} @ {last.weight ?? '-'} kg ({last.difficulty ?? '-'})</p>
                         </div>
                     )}
+
+                    <section className="chart-section card">
+                        <div className="section-heading">
+                            <h3>Vývoj výkonu</h3>
+                            <span>Váha v čase</span>
+                        </div>
+                        <ProgressLineChart
+                            points={chartPoints}
+                            valueSuffix="kg"
+                            emptyStateText="Pro graf výkonu přidejte aspoň dva záznamy s vyplněnou váhou."
+                        />
+                    </section>
 
                     {entries.length > 0 && (
                         <div className="recent-entries">

@@ -703,6 +703,120 @@ button:not(.primary):not(.back-button) {
     gap: 10px;
 }
 
+.chart-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.chart-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chart-tab {
+    padding: 9px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--muted-text);
+}
+
+.chart-tab.active {
+    color: #fff;
+    background: linear-gradient(90deg, rgba(225, 29, 47, 0.24), rgba(242, 194, 48, 0.18));
+    border-color: rgba(242, 194, 48, 0.32);
+    box-shadow: 0 10px 24px rgba(225, 29, 47, 0.16);
+}
+
+.progress-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.chart-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.chart-summary div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.chart-summary span,
+.chart-axis-label,
+.chart-tick-label,
+.chart-empty {
+    color: var(--muted-text);
+    font-size: 12px;
+}
+
+.chart-summary strong {
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.3;
+}
+
+.chart-svg {
+    width: 100%;
+    height: 190px;
+    overflow: visible;
+}
+
+.chart-grid-line {
+    stroke: rgba(255, 255, 255, 0.08);
+    stroke-width: 1;
+}
+
+.chart-line-shadow {
+    fill: none;
+    stroke: rgba(5, 5, 5, 0.65);
+    stroke-width: 7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.chart-line {
+    fill: none;
+    stroke: url(#progress-line-gradient);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.chart-dot-shadow {
+    fill: rgba(5, 5, 5, 0.6);
+}
+
+.chart-dot {
+    fill: var(--accent-2);
+    stroke: var(--accent);
+    stroke-width: 1.5;
+}
+
+.chart-axis-label {
+    font-size: 11px;
+}
+
+.chart-tick-label {
+    font-size: 11px;
+}
+
+.chart-empty {
+    margin: 0;
+    padding: 6px 0 2px;
+}
+
 @media (max-width: 560px) {
 
     .dashboard-hero,
@@ -724,6 +838,10 @@ button:not(.primary):not(.back-button) {
         min-height: 38px;
         border-radius: 10px;
         padding: 0;
+    }
+
+    .chart-summary {
+        grid-template-columns: 1fr;
     }
 }
 

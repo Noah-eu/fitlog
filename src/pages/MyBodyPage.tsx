@@ -1,6 +1,21 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import type { BodyMeasurement } from '../types/body'
 import { deleteMeasurement, saveMeasurement, subscribeToMeasurements, updateMeasurement } from '../services/bodyMeasurementStorage'
+import ProgressLineChart from '../components/ProgressLineChart'
+
+type MeasurementMetricKey = 'bodyWeight' | 'chest' | 'waist' | 'biceps' | 'thighs'
+
+const MEASUREMENT_METRICS: { key: MeasurementMetricKey; label: string; suffix: string }[] = [
+    { key: 'bodyWeight', label: 'Váha', suffix: 'kg' },
+    { key: 'chest', label: 'Hrudník', suffix: 'cm' },
+    { key: 'waist', label: 'Pas', suffix: 'cm' },
+    { key: 'biceps', label: 'Biceps', suffix: 'cm' },
+    { key: 'thighs', label: 'Stehna', suffix: 'cm' },
+]
+
+function formatChartDate(date: string) {
+    return new Date(date).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })
+}
 
 function todayISODate() {
     const t = new Date()
@@ -21,6 +36,7 @@ export default function MyBodyPage() {
     const [note, setNote] = useState<string>('')
     const [editingId, setEditingId] = useState<string | null>(null)
     const [saveError, setSaveError] = useState<string | null>(null)
+    const [selectedMetric, setSelectedMetric] = useState<MeasurementMetricKey>('bodyWeight')
 
     useEffect(() => {
         return subscribeToMeasurements(setMeasurements)
@@ -95,6 +111,39 @@ export default function MyBodyPage() {
     }
 
     const latest = measurements[0]
+    const chartMeasurements = useMemo(
+        () => [...measurements].sort((a, b) => a.date.localeCompare(b.date)),
+        [measurements],
+    )
+    const metricsWithData = useMemo(
+        () => new Set<MeasurementMetricKey>(
+            MEASUREMENT_METRICS
+                .filter(({ key }) => chartMeasurements.some((measurement) => typeof measurement[key] === 'number'))
+                .map(({ key }) => key),
+        ),
+        [chartMeasurements],
+    )
+    const preferredMetric = useMemo(() => {
+        if (metricsWithData.has('bodyWeight')) return 'bodyWeight'
+        return MEASUREMENT_METRICS.find(({ key }) => metricsWithData.has(key))?.key ?? 'bodyWeight'
+    }, [metricsWithData])
+    const selectedMetricConfig = MEASUREMENT_METRICS.find(({ key }) => key === selectedMetric) ?? MEASUREMENT_METRICS[0]
+    const chartPoints = useMemo(
+        () => chartMeasurements
+            .map((measurement) => ({
+                label: formatChartDate(measurement.date),
+                value: measurement[selectedMetric],
+            }))
+            .filter((point): point is { label: string; value: number } => typeof point.value === 'number' && Number.isFinite(point.value)),
+        [chartMeasurements, selectedMetric],
+    )
+
+    useEffect(() => {
+        if (!metricsWithData.size) return
+        if (!metricsWithData.has(selectedMetric)) {
+            setSelectedMetric(preferredMetric)
+        }
+    }, [metricsWithData, preferredMetric, selectedMetric])
 
     return (
         <div className="page">
@@ -146,6 +195,33 @@ export default function MyBodyPage() {
                     {latest.note && <div>Poznámka: {latest.note}</div>}
                 </div>
             )}
+
+            <section className="chart-section card">
+                <div className="section-heading">
+                    <h3>Vývoj</h3>
+                    <span>{selectedMetricConfig.label}</span>
+                </div>
+
+                <div className="chart-tabs" role="tablist" aria-label="Metriky vývoje těla">
+                    {MEASUREMENT_METRICS.map((metric) => (
+                        <button
+                            key={metric.key}
+                            type="button"
+                            className={`chart-tab ${metric.key === selectedMetric ? 'active' : ''}`}
+                            onClick={() => setSelectedMetric(metric.key)}
+                            aria-pressed={metric.key === selectedMetric}
+                        >
+                            {metric.label}
+                        </button>
+                    ))}
+                </div>
+
+                <ProgressLineChart
+                    points={chartPoints}
+                    valueSuffix={selectedMetricConfig.suffix}
+                    emptyStateText={`Pro metriku ${selectedMetricConfig.label.toLowerCase()} přidejte aspoň dvě měření.`}
+                />
+            </section>
 
             <div className="entry-list">
                 {measurements.length === 0 ? (

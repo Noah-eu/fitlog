@@ -17,6 +17,7 @@ Local source map (read these next when editing UI or routing)
 - src/components/AppShell.tsx
 - src/components/BackButton.tsx
 - src/components/BottomNav.tsx
+- src/components/ProgressLineChart.tsx
 - src/components/WorkoutCalendar.tsx
 - src/pages/TodayPage.tsx
 - src/pages/ExercisesPage.tsx
