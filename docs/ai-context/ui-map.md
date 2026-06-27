@@ -18,6 +18,7 @@ Primary screens and key components
   - Template info (description, muscle group)
   - Last used weight (pulled from `users/{userId}/exerciseStats`)
   - Quick-add to workout
+  - Visible in-app `Zpět` button with safe fallback to `/exercises` when the detail route is opened directly
 
 - Workout entry
   - Form to capture date, exercise, sets (weight/reps/difficulty), notes
@@ -48,6 +49,7 @@ Current pages (scaffolded)
 
 Navigation
 - Top-level routing is in `src/App.tsx` and the mobile bottom nav is `src/components/BottomNav.tsx`.
+- Nested/detail navigation should prefer router history (`navigate(-1)`) with explicit fallbacks for direct opens.
 
 My body details
 - `src/pages/MyBodyPage.tsx` supports adding, editing, and deleting local body measurements. Latest measurement summary is shown at the top, history below (newest first).

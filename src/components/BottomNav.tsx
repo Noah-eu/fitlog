@@ -19,7 +19,7 @@ export default function BottomNav() {
                     end={t.to === '/'}
                     className={({ isActive }) => (isActive ? 'tab active' : 'tab')}
                 >
-                    {t.label}
+                    <span>{t.label}</span>
                 </NavLink>
             ))}
         </nav>

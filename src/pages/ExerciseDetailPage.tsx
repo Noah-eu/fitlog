@@ -1,8 +1,9 @@
 import React, { useMemo, useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import exercises from '../data/exercises'
 import type { WorkoutEntry } from '../types/workout'
 import { getEntriesByExercise, saveEntry, updateEntry, deleteEntry } from '../services/workoutStorage'
+import BackButton from '../components/BackButton'
 
 function todayISODate() {
     const t = new Date()
@@ -14,15 +15,14 @@ function todayISODate() {
 
 export default function ExerciseDetailPage() {
     const { id } = useParams<{ id: string }>()
-    const navigate = useNavigate()
     const ex = exercises.find((e) => e.id === id)
 
     if (!ex) {
         return (
             <div className="page">
+                <BackButton fallbackTo="/exercises" />
                 <h1>Nenalezeno</h1>
                 <p>Cvičení nebylo nalezeno.</p>
-                <button onClick={() => navigate('/exercises')}>Zpět</button>
             </div>
         )
     }
@@ -98,7 +98,7 @@ export default function ExerciseDetailPage() {
 
     return (
         <div className="page">
-            <button className="back" onClick={() => navigate('/exercises')}>Zpět</button>
+            <BackButton fallbackTo="/exercises" />
             <h1>{ex.name}</h1>
             <div className="exercise-detail">
                 <div className="thumb large" />
