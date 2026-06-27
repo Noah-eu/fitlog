@@ -1,5 +1,6 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app'
 import { getAuth, type Auth } from 'firebase/auth'
+import { getFirestore, type Firestore } from 'firebase/firestore'
 
 const requiredEnvKeys = [
   'VITE_FIREBASE_API_KEY',
@@ -110,6 +111,7 @@ const firebaseSetupInstructions = buildFirebaseSetupError()
 let firebaseConfigError: string | null = null
 let app: FirebaseApp | null = null
 let auth: Auth | null = null
+let db: Firestore | null = null
 
 if (firebaseSetupInstructions) {
   firebaseConfigError = firebaseSetupInstructions
@@ -117,6 +119,7 @@ if (firebaseSetupInstructions) {
   try {
     app = initializeApp(firebaseConfig)
     auth = getAuth(app)
+    db = getFirestore(app)
   } catch (error) {
     console.warn('Firebase initialization failed', error)
     firebaseConfigError =
@@ -124,7 +127,7 @@ if (firebaseSetupInstructions) {
   }
 }
 
-export { app, auth }
+export { app, auth, db }
 
 export function isFirebaseConfigured() {
   return auth !== null && firebaseConfigError === null

@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getAllEntries, getWorkoutDateKey } from '../services/workoutStorage'
+import { getWorkoutDateKey, subscribeToEntries } from '../services/workoutStorage'
 import { getAllMeasurements } from '../services/bodyMeasurementStorage'
 import exercises from '../data/exercises'
 import type { WorkoutEntry } from '../types/workout'
@@ -70,8 +70,12 @@ function buildPerformanceOverview(entries: WorkoutEntry[]) {
 
 export default function TodayPage() {
     const navigate = useNavigate()
-    const entries = useMemo(() => getAllEntries(), [])
+    const [entries, setEntries] = useState<WorkoutEntry[]>([])
     const measurements = useMemo(() => getAllMeasurements(), [])
+
+    useEffect(() => {
+        return subscribeToEntries(setEntries)
+    }, [])
 
     const latestMeasurement = measurements[0]
     const weekCount = last7DaysCount(entries)

@@ -37,3 +37,9 @@ After setting env vars, run the app normally with `npm run dev`.
 
 If `VITE_FIREBASE_*` values are missing, empty, or still placeholders, the app now shows a setup screen instead of crashing. On Netlify, set the same variables in Site configuration -> Environment variables.
 
+Firestore workout sync
+
+Workout entries now sync through Cloud Firestore for logged-in users under `users/{userId}/workoutEntries/{entryId}`. Body measurements remain local-only.
+
+Deploy Firestore rules that restrict access to the authenticated owner's workout path before relying on shared workout sync across devices.
+

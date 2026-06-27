@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import exercises from '../data/exercises'
 import type { WorkoutEntry } from '../types/workout'
-import { getEntriesByExercise, saveEntry, updateEntry, deleteEntry, getWorkoutDateKey, toStoredWorkoutDate } from '../services/workoutStorage'
+import { deleteEntry, getWorkoutDateKey, saveEntry, subscribeToEntries, toStoredWorkoutDate, updateEntry } from '../services/workoutStorage'
 import BackButton from '../components/BackButton'
 
 function todayISODate() {
@@ -34,48 +34,55 @@ export default function ExerciseDetailPage() {
     const [difficulty, setDifficulty] = useState<'lehké' | 'akorát' | 'těžké'>('akorát')
     const [note, setNote] = useState<string>('')
     const [editingId, setEditingId] = useState<string | null>(null)
+    const [saveError, setSaveError] = useState<string | null>(null)
 
 
     useEffect(() => {
-        if (ex.id) setEntries(getEntriesByExercise(ex.id))
+        if (!ex.id) return
+
+        return subscribeToEntries((allEntries) => {
+            setEntries(allEntries.filter((entry) => entry.exerciseId === ex.id))
+        })
     }, [ex.id])
 
     const last = useMemo(() => entries[0], [entries])
 
-    function handleSave(e: React.FormEvent) {
+    async function handleSave(e: React.FormEvent) {
         e.preventDefault()
         if (!ex.id) return
-        if (editingId) {
-            const updated = updateEntry(editingId, {
-                exerciseId: ex.id,
-                date: toStoredWorkoutDate(date),
-                weight: typeof weight === 'number' && !Number.isNaN(weight) ? weight : undefined,
-                reps: typeof reps === 'number' && !Number.isNaN(reps) ? reps : undefined,
-                sets: typeof setsVal === 'number' && !Number.isNaN(setsVal) ? setsVal : undefined,
-                difficulty,
-                note,
-            })
-            if (updated) {
-                setEntries((s) => [updated, ...s.filter((i) => i.id !== updated.id)])
+        setSaveError(null)
+
+        try {
+            if (editingId) {
+                await updateEntry(editingId, {
+                    exerciseId: ex.id,
+                    date: toStoredWorkoutDate(date),
+                    weight: typeof weight === 'number' && !Number.isNaN(weight) ? weight : undefined,
+                    reps: typeof reps === 'number' && !Number.isNaN(reps) ? reps : undefined,
+                    sets: typeof setsVal === 'number' && !Number.isNaN(setsVal) ? setsVal : undefined,
+                    difficulty,
+                    note,
+                })
+                setEditingId(null)
+            } else {
+                await saveEntry({
+                    exerciseId: ex.id,
+                    date: toStoredWorkoutDate(date),
+                    weight: typeof weight === 'number' && !Number.isNaN(weight) ? weight : undefined,
+                    reps: typeof reps === 'number' && !Number.isNaN(reps) ? reps : undefined,
+                    sets: typeof setsVal === 'number' && !Number.isNaN(setsVal) ? setsVal : undefined,
+                    difficulty,
+                    note,
+                })
             }
-            setEditingId(null)
-        } else {
-            const entry = saveEntry({
-                exerciseId: ex.id,
-                date: toStoredWorkoutDate(date),
-                weight: typeof weight === 'number' && !Number.isNaN(weight) ? weight : undefined,
-                reps: typeof reps === 'number' && !Number.isNaN(reps) ? reps : undefined,
-                sets: typeof setsVal === 'number' && !Number.isNaN(setsVal) ? setsVal : undefined,
-                difficulty,
-                note,
-            })
-            setEntries((s) => [entry, ...s])
+
+            setWeight('')
+            setReps('')
+            setSetsVal('')
+            setNote('')
+        } catch (error) {
+            setSaveError(error instanceof Error ? error.message : 'Nepodařilo se uložit výkon.')
         }
-        // reset lightweight fields
-        setWeight('')
-        setReps('')
-        setSetsVal('')
-        setNote('')
     }
 
     function startEdit(item: WorkoutEntry) {
@@ -89,11 +96,13 @@ export default function ExerciseDetailPage() {
         window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
-    function handleDelete(id: string) {
+    async function handleDelete(id: string) {
         if (!confirm('Smazat tento záznam?')) return
-        const ok = deleteEntry(id)
-        if (!ok) return
-        setEntries((s) => s.filter((i) => i.id !== id))
+        try {
+            await deleteEntry(id)
+        } catch (error) {
+            setSaveError(error instanceof Error ? error.message : 'Nepodařilo se smazat záznam.')
+        }
     }
 
     return (
@@ -145,6 +154,7 @@ export default function ExerciseDetailPage() {
                             <textarea value={note} onChange={(ev) => setNote(ev.target.value)} />
                         </label>
                         <button type="submit" className="primary">Zapsat výkon</button>
+                        {saveError ? <div className="form-error">{saveError}</div> : null}
                     </form>
 
                     {last && (

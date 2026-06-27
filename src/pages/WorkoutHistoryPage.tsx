@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { deleteEntry, getAllEntries, getWorkoutDateKey, toStoredWorkoutDate, updateEntry } from '../services/workoutStorage'
+import { deleteEntry, getWorkoutDateKey, subscribeToEntries, toStoredWorkoutDate, updateEntry } from '../services/workoutStorage'
 import type { WorkoutEntry } from '../types/workout'
 import exercises from '../data/exercises'
 import WorkoutCalendar from '../components/WorkoutCalendar'
@@ -44,21 +44,25 @@ export default function WorkoutHistoryPage() {
     const [editSets, setEditSets] = useState<number | ''>('')
     const [editDate, setEditDate] = useState<string>('')
     const [editDifficulty, setEditDifficulty] = useState<'lehké' | 'akorát' | 'těžké'>('akorát')
+    const [entryError, setEntryError] = useState<string | null>(null)
 
     useEffect(() => {
-        const nextEntries = getAllEntries()
-        const todayKey = toDateKey(new Date())
-        const workoutDays = new Set(nextEntries.map((entry) => getWorkoutDateKey(entry.date)))
-        const initialDateKey = workoutDays.has(todayKey)
-            ? todayKey
-            : nextEntries[0]
-                ? getWorkoutDateKey(nextEntries[0].date)
-                : todayKey
+        return subscribeToEntries((nextEntries) => {
+            const todayKey = toDateKey(new Date())
+            const workoutDays = new Set(nextEntries.map((entry) => getWorkoutDateKey(entry.date)))
 
-        setEntries(nextEntries)
-        setSelectedDateKey(initialDateKey)
-        setCurrentMonth(parseDateKey(initialDateKey))
+            setEntries(nextEntries)
+            setSelectedDateKey((currentDateKey) => {
+                if (workoutDays.has(currentDateKey)) return currentDateKey
+                if (workoutDays.has(todayKey)) return todayKey
+                return nextEntries[0] ? getWorkoutDateKey(nextEntries[0].date) : todayKey
+            })
+        })
     }, [])
+
+    useEffect(() => {
+        setCurrentMonth(parseDateKey(selectedDateKey))
+    }, [selectedDateKey])
 
     const workoutDays = useMemo(() => new Set(entries.map((entry) => getWorkoutDateKey(entry.date))), [entries])
     const selectedDayEntries = useMemo(
@@ -80,24 +84,33 @@ export default function WorkoutHistoryPage() {
         setEditingId(null)
     }
 
-    function saveEdit(id: string) {
-        const updated = updateEntry(id, {
-            date: toStoredWorkoutDate(editDate),
-            weight: typeof editWeight === 'number' ? editWeight : undefined,
-            reps: typeof editReps === 'number' ? editReps : undefined,
-            sets: typeof editSets === 'number' ? editSets : undefined,
-            difficulty: editDifficulty,
-            note: editNote,
-        })
-        if (updated) setEntries(getAllEntries())
-        setEditingId(null)
+    async function saveEdit(id: string) {
+        setEntryError(null)
+
+        try {
+            await updateEntry(id, {
+                date: toStoredWorkoutDate(editDate),
+                weight: typeof editWeight === 'number' ? editWeight : undefined,
+                reps: typeof editReps === 'number' ? editReps : undefined,
+                sets: typeof editSets === 'number' ? editSets : undefined,
+                difficulty: editDifficulty,
+                note: editNote,
+            })
+            setEditingId(null)
+        } catch (error) {
+            setEntryError(error instanceof Error ? error.message : 'Nepodařilo se uložit změny.')
+        }
     }
 
-    function handleDelete(id: string) {
+    async function handleDelete(id: string) {
         if (!confirm('Smazat tento záznam?')) return
-        const ok = deleteEntry(id)
-        if (!ok) return
-        setEntries(getAllEntries())
+        setEntryError(null)
+
+        try {
+            await deleteEntry(id)
+        } catch (error) {
+            setEntryError(error instanceof Error ? error.message : 'Nepodařilo se smazat záznam.')
+        }
     }
 
     function handleSelectDate(dateKey: string) {
@@ -140,45 +153,48 @@ export default function WorkoutHistoryPage() {
                         <p>Pro tento den zatím není uložený žádný trénink.</p>
                     </div>
                 ) : (
-                    <ul className="entry-list">
-                        {selectedDayEntries.map((en) => (
-                            <li key={en.id} className="entry-item">
-                                <div className="entry-top">
-                                    <div className="entry-title">{nameFor(en.exerciseId)}</div>
-                                    <div className="entry-date">{new Date(en.createdAt).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}</div>
-                                </div>
-                                {editingId === en.id ? (
-                                    <div className="edit-form">
-                                        <label>Datum<input type="date" value={editDate} onChange={(ev) => setEditDate(ev.target.value)} /></label>
-                                        <label>Váha<input type="number" value={editWeight as any} onChange={(ev) => setEditWeight(ev.target.value === '' ? '' : Number(ev.target.value))} /></label>
-                                        <label>Opakování<input type="number" value={editReps as any} onChange={(ev) => setEditReps(ev.target.value === '' ? '' : Number(ev.target.value))} /></label>
-                                        <label>Série<input type="number" value={editSets as any} onChange={(ev) => setEditSets(ev.target.value === '' ? '' : Number(ev.target.value))} /></label>
-                                        <label>Obtížnost
-                                            <select value={editDifficulty} onChange={(ev) => setEditDifficulty(ev.target.value as any)}>
-                                                <option value="lehké">lehké</option>
-                                                <option value="akorát">akorát</option>
-                                                <option value="těžké">těžké</option>
-                                            </select>
-                                        </label>
-                                        <label>Poznámka<textarea value={editNote} onChange={(ev) => setEditNote(ev.target.value)} /></label>
-                                        <div className="edit-actions">
-                                            <button onClick={() => saveEdit(en.id)}>Uložit</button>
-                                            <button onClick={cancelEdit}>Zrušit</button>
-                                        </div>
+                    <>
+                        {entryError ? <div className="form-error">{entryError}</div> : null}
+                        <ul className="entry-list">
+                            {selectedDayEntries.map((en) => (
+                                <li key={en.id} className="entry-item">
+                                    <div className="entry-top">
+                                        <div className="entry-title">{nameFor(en.exerciseId)}</div>
+                                        <div className="entry-date">{new Date(en.createdAt).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}</div>
                                     </div>
-                                ) : (
-                                    <>
-                                        <div className="entry-meta">{en.sets ?? '-'}×{en.reps ?? '-'} • {en.weight ?? '-'} kg • {en.difficulty ?? '-'}</div>
-                                        {en.note && <div className="entry-note">{en.note}</div>}
-                                        <div className="entry-actions">
-                                            <button onClick={() => startEdit(en)}>Upravit</button>
-                                            <button onClick={() => handleDelete(en.id)}>Smazat</button>
+                                    {editingId === en.id ? (
+                                        <div className="edit-form">
+                                            <label>Datum<input type="date" value={editDate} onChange={(ev) => setEditDate(ev.target.value)} /></label>
+                                            <label>Váha<input type="number" value={editWeight as any} onChange={(ev) => setEditWeight(ev.target.value === '' ? '' : Number(ev.target.value))} /></label>
+                                            <label>Opakování<input type="number" value={editReps as any} onChange={(ev) => setEditReps(ev.target.value === '' ? '' : Number(ev.target.value))} /></label>
+                                            <label>Série<input type="number" value={editSets as any} onChange={(ev) => setEditSets(ev.target.value === '' ? '' : Number(ev.target.value))} /></label>
+                                            <label>Obtížnost
+                                                <select value={editDifficulty} onChange={(ev) => setEditDifficulty(ev.target.value as any)}>
+                                                    <option value="lehké">lehké</option>
+                                                    <option value="akorát">akorát</option>
+                                                    <option value="těžké">těžké</option>
+                                                </select>
+                                            </label>
+                                            <label>Poznámka<textarea value={editNote} onChange={(ev) => setEditNote(ev.target.value)} /></label>
+                                            <div className="edit-actions">
+                                                <button onClick={() => saveEdit(en.id)}>Uložit</button>
+                                                <button onClick={cancelEdit}>Zrušit</button>
+                                            </div>
                                         </div>
-                                    </>
-                                )}
-                            </li>
-                        ))}
-                    </ul>
+                                    ) : (
+                                        <>
+                                            <div className="entry-meta">{en.sets ?? '-'}×{en.reps ?? '-'} • {en.weight ?? '-'} kg • {en.difficulty ?? '-'}</div>
+                                            {en.note && <div className="entry-note">{en.note}</div>}
+                                            <div className="entry-actions">
+                                                <button onClick={() => startEdit(en)}>Upravit</button>
+                                                <button onClick={() => handleDelete(en.id)}>Smazat</button>
+                                            </div>
+                                        </>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                    </>
                 )}
             </section>
         </div>

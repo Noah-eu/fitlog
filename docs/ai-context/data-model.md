@@ -26,7 +26,7 @@ Suggested exercise template fields (frontend/local exercise shape)
 - recommendedReps?: string
 - recommendedSets?: string
 
-Local workout entry shape (stored in browser/local storage for MVP):
+Workout entry shape:
 - id: string
 - exerciseId: string
 - date: string (ISO date)
@@ -36,6 +36,12 @@ Local workout entry shape (stored in browser/local storage for MVP):
 - difficulty?: 'lehké' | 'akorát' | 'těžké'
 - note?: string
 - createdAt: string (ISO timestamp)
+- updatedAt?: string (ISO timestamp)
+
+Workout entry storage
+- Firestore path: `users/{userId}/workoutEntries/{entryId}`
+- Ownership: only the authenticated user may read or write entries under their own `userId` path.
+- Local fallback: workout entries may remain in browser localStorage only when Firebase Auth/Firestore is unavailable, or until the user manually imports local data into cloud storage.
 
 Local body measurement shape (stored in browser/local storage for MVP):
 - id: string
@@ -49,14 +55,17 @@ Local body measurement shape (stored in browser/local storage for MVP):
 - createdAt: string (ISO timestamp)
 - updatedAt?: string (ISO timestamp)
 
-- `users/{userId}/workouts/{workoutId}`
+- `users/{userId}/workoutEntries/{entryId}`
   - id: string
-  - date: timestamp
-  - notes?: string
-  - exercises: array of exercise instances
-    - exerciseId: string
-    - name: string (denormalized)
-    - sets: array of {weight: number, reps: number, difficulty?: number, note?: string}
+  - exerciseId: string
+  - date: string (stored as ISO date-time for stable day keys)
+  - weight?: number
+  - reps?: number
+  - sets?: number
+  - difficulty?: 'lehké' | 'akorát' | 'těžké'
+  - note?: string
+  - createdAt: string
+  - updatedAt?: string
 
 - `users/{userId}/measurements/{measurementId}`
   - id: string
@@ -64,10 +73,6 @@ Local body measurement shape (stored in browser/local storage for MVP):
   - bodyWeight?: number
   - measurements?: map (waist, chest, arm, leg...)
 
-- `users/{userId}/exerciseStats/{exerciseId}` (optional)
-  - lastUsedWeight?: number
-  - lastPerformed: timestamp
-
 Notes
 - Storing `exercises` as a global collection keeps templates separate from personal progress.
-- Denormalize `name` on workout entries to keep history robust against template edits.
+- Workout entries stay separate from exercise templates and are always scoped by `userId`.

@@ -10,4 +10,5 @@ export type WorkoutEntry = {
     difficulty?: Difficulty
     note?: string
     createdAt: string // ISO timestamp
+    updatedAt?: string // ISO timestamp
 }
