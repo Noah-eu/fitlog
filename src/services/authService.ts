@@ -5,6 +5,7 @@ const runtimeConfigErrorCodes = new Set([
     'auth/invalid-api-key',
     'auth/api-key-not-valid.-please-pass-a-valid-api-key',
     'auth/app-not-authorized',
+    'auth/auth-domain-config-required',
     'auth/invalid-app-credential',
 ])
 

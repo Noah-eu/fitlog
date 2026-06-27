@@ -26,6 +26,22 @@ function isPlaceholderLike(value: string) {
   )
 }
 
+function looksLikeApiKey(value: string) {
+  return /^AIza[\w-]{20,}$/.test(value)
+}
+
+function looksLikeAuthDomain(value: string) {
+  return /\.(firebaseapp\.com|web\.app)$/i.test(value)
+}
+
+function looksLikeProjectId(value: string) {
+  return /^[a-z0-9-]{4,}$/.test(value)
+}
+
+function looksLikeAppId(value: string) {
+  return /^\d+:\d+:web:[a-z0-9]+$/i.test(value)
+}
+
 const firebaseConfig = {
   apiKey: normalizeEnv(import.meta.env.VITE_FIREBASE_API_KEY),
   authDomain: normalizeEnv(import.meta.env.VITE_FIREBASE_AUTH_DOMAIN),
@@ -42,18 +58,60 @@ const requiredConfigValues = {
   VITE_FIREBASE_APP_ID: firebaseConfig.appId,
 } satisfies Record<(typeof requiredEnvKeys)[number], string>
 
-const invalidRequiredKeys = requiredEnvKeys.filter((key) => {
+const missingOrPlaceholderKeys = requiredEnvKeys.filter((key) => {
   return isPlaceholderLike(requiredConfigValues[key])
 })
 
-const firebaseSetupInstructions =
-  'Firebase konfigurace chybí nebo obsahuje zástupné hodnoty. Doplňte VITE_FIREBASE_* proměnné v .env.local pro lokální vývoj a v Netlify Environment variables pro nasazení.'
+const malformedRequiredKeys = requiredEnvKeys.filter((key) => {
+  const value = requiredConfigValues[key]
+  if (isPlaceholderLike(value)) return false
+
+  switch (key) {
+    case 'VITE_FIREBASE_API_KEY':
+      return !looksLikeApiKey(value)
+    case 'VITE_FIREBASE_AUTH_DOMAIN':
+      return !looksLikeAuthDomain(value)
+    case 'VITE_FIREBASE_PROJECT_ID':
+      return !looksLikeProjectId(value)
+    case 'VITE_FIREBASE_APP_ID':
+      return !looksLikeAppId(value)
+    default:
+      return false
+  }
+})
+
+function buildFirebaseSetupError() {
+  if (missingOrPlaceholderKeys.length === 0 && malformedRequiredKeys.length === 0) {
+    return null
+  }
+
+  const missingText =
+    missingOrPlaceholderKeys.length > 0
+      ? `Chybí nebo obsahují zástupné hodnoty: ${missingOrPlaceholderKeys.join(', ')}.`
+      : ''
+
+  const malformedText =
+    malformedRequiredKeys.length > 0
+      ? `Neplatný formát mají: ${malformedRequiredKeys.join(', ')}.`
+      : ''
+
+  return [
+    'Firebase konfigurace není připravená pro přihlášení.',
+    missingText,
+    malformedText,
+    'Doplňte platné VITE_FIREBASE_* proměnné v .env.local pro lokální vývoj a v Netlify Environment variables pro nasazení.',
+  ]
+    .filter(Boolean)
+    .join(' ')
+}
+
+const firebaseSetupInstructions = buildFirebaseSetupError()
 
 let firebaseConfigError: string | null = null
 let app: FirebaseApp | null = null
 let auth: Auth | null = null
 
-if (invalidRequiredKeys.length > 0) {
+if (firebaseSetupInstructions) {
   firebaseConfigError = firebaseSetupInstructions
 } else {
   try {
@@ -61,7 +119,8 @@ if (invalidRequiredKeys.length > 0) {
     auth = getAuth(app)
   } catch (error) {
     console.warn('Firebase initialization failed', error)
-    firebaseConfigError = firebaseSetupInstructions
+    firebaseConfigError =
+      'Firebase konfigurace se nepodařilo inicializovat. Zkontrolujte VITE_FIREBASE_* proměnné v .env.local a v Netlify Environment variables.'
   }
 }
 
