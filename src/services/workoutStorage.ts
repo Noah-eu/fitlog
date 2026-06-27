@@ -36,3 +36,37 @@ export function saveEntry(entry: Omit<WorkoutEntry, 'id' | 'createdAt'>): Workou
     }
     return full
 }
+
+export function getEntryById(id: string): WorkoutEntry | undefined {
+    return getAllEntries().find((e) => e.id === id)
+}
+
+export function updateEntry(id: string, updates: Partial<Omit<WorkoutEntry, 'id' | 'createdAt'>>): WorkoutEntry | null {
+    const all = getAllEntries()
+    const idx = all.findIndex((e) => e.id === id)
+    if (idx === -1) return null
+    const existing = all[idx]
+    const updated: WorkoutEntry = { ...existing, ...updates }
+    // keep createdAt stable; ensure id is preserved
+    updated.id = existing.id
+    updated.createdAt = existing.createdAt
+    all[idx] = updated
+    try {
+        localStorage.setItem(KEY, JSON.stringify(all))
+    } catch (e) {
+        console.warn('Failed to update workout entry', e)
+    }
+    return updated
+}
+
+export function deleteEntry(id: string): boolean {
+    const all = getAllEntries()
+    const filtered = all.filter((e) => e.id !== id)
+    try {
+        localStorage.setItem(KEY, JSON.stringify(filtered))
+        return true
+    } catch (e) {
+        console.warn('Failed to delete workout entry', e)
+        return false
+    }
+}

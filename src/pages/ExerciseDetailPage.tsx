@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import exercises from '../data/exercises'
 import type { WorkoutEntry } from '../types/workout'
-import { getEntriesByExercise, saveEntry } from '../services/workoutStorage'
+import { getEntriesByExercise, saveEntry, updateEntry, deleteEntry } from '../services/workoutStorage'
 
 function todayISODate() {
     const t = new Date()
@@ -33,6 +33,8 @@ export default function ExerciseDetailPage() {
     const [setsVal, setSetsVal] = useState<number | ''>('')
     const [difficulty, setDifficulty] = useState<'lehké' | 'akorát' | 'těžké'>('akorát')
     const [note, setNote] = useState<string>('')
+    const [editingId, setEditingId] = useState<string | null>(null)
+
 
     useEffect(() => {
         if (ex.id) setEntries(getEntriesByExercise(ex.id))
@@ -43,21 +45,55 @@ export default function ExerciseDetailPage() {
     function handleSave(e: React.FormEvent) {
         e.preventDefault()
         if (!ex.id) return
-        const entry = saveEntry({
-            exerciseId: ex.id,
-            date: new Date(date).toISOString(),
-            weight: typeof weight === 'number' && !Number.isNaN(weight) ? weight : undefined,
-            reps: typeof reps === 'number' && !Number.isNaN(reps) ? reps : undefined,
-            sets: typeof setsVal === 'number' && !Number.isNaN(setsVal) ? setsVal : undefined,
-            difficulty,
-            note,
-        })
-        setEntries((s) => [entry, ...s])
+        if (editingId) {
+            const updated = updateEntry(editingId, {
+                exerciseId: ex.id,
+                date: new Date(date).toISOString(),
+                weight: typeof weight === 'number' && !Number.isNaN(weight) ? weight : undefined,
+                reps: typeof reps === 'number' && !Number.isNaN(reps) ? reps : undefined,
+                sets: typeof setsVal === 'number' && !Number.isNaN(setsVal) ? setsVal : undefined,
+                difficulty,
+                note,
+            })
+            if (updated) {
+                setEntries((s) => [updated, ...s.filter((i) => i.id !== updated.id)])
+            }
+            setEditingId(null)
+        } else {
+            const entry = saveEntry({
+                exerciseId: ex.id,
+                date: new Date(date).toISOString(),
+                weight: typeof weight === 'number' && !Number.isNaN(weight) ? weight : undefined,
+                reps: typeof reps === 'number' && !Number.isNaN(reps) ? reps : undefined,
+                sets: typeof setsVal === 'number' && !Number.isNaN(setsVal) ? setsVal : undefined,
+                difficulty,
+                note,
+            })
+            setEntries((s) => [entry, ...s])
+        }
         // reset lightweight fields
         setWeight('')
         setReps('')
         setSetsVal('')
         setNote('')
+    }
+
+    function startEdit(item: WorkoutEntry) {
+        setEditingId(item.id)
+        setDate(item.date.slice(0, 10))
+        setWeight(item.weight ?? '')
+        setReps(item.reps ?? '')
+        setSetsVal(item.sets ?? '')
+        setDifficulty(item.difficulty ?? 'akorát')
+        setNote(item.note ?? '')
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
+    function handleDelete(id: string) {
+        if (!confirm('Smazat tento záznam?')) return
+        const ok = deleteEntry(id)
+        if (!ok) return
+        setEntries((s) => s.filter((i) => i.id !== id))
     }
 
     return (
@@ -120,12 +156,16 @@ export default function ExerciseDetailPage() {
                         <div className="recent-entries">
                             <h3>Nedávné</h3>
                             <ul>
-                                {entries.map((en) => (
-                                    <li key={en.id} className="entry-item">
-                                        <div className="entry-meta">{new Date(en.date).toLocaleDateString()} • {en.sets ?? '-'}×{en.reps ?? '-'} • {en.weight ?? '-'} kg</div>
-                                        <div className="entry-note">{en.note}</div>
-                                    </li>
-                                ))}
+                                            {entries.map((en) => (
+                                                <li key={en.id} className="entry-item">
+                                                    <div className="entry-meta">{new Date(en.date).toLocaleDateString()} • {en.sets ?? '-'}×{en.reps ?? '-'} • {en.weight ?? '-'} kg</div>
+                                                    <div className="entry-note">{en.note}</div>
+                                                    <div className="entry-actions">
+                                                        <button onClick={() => startEdit(en)}>Upravit</button>
+                                                        <button onClick={() => handleDelete(en.id)}>Smazat</button>
+                                                    </div>
+                                                </li>
+                                            ))}
                             </ul>
                         </div>
                     )}
