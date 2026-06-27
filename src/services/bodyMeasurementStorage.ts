@@ -8,6 +8,9 @@ const KEY = 'fitlog.body.v1'
 type BodyMeasurementInput = Omit<BodyMeasurement, 'id' | 'createdAt' | 'updatedAt'>
 type BodyMeasurementUpdate = Partial<Omit<BodyMeasurement, 'id' | 'createdAt'>>
 type MeasurementsListener = (measurements: BodyMeasurement[]) => void
+type NumericMeasurementField = 'bodyWeight' | 'chest' | 'waist' | 'biceps' | 'thighs'
+
+const NUMERIC_FIELDS: NumericMeasurementField[] = ['bodyWeight', 'chest', 'waist', 'biceps', 'thighs']
 
 let measurementsCache: BodyMeasurement[] = []
 let initialized = false
@@ -21,11 +24,41 @@ function compareMeasurementsDesc(a: BodyMeasurement, b: BodyMeasurement): number
     return b.date.localeCompare(a.date)
 }
 
+function normalizeNumericValue(value: unknown): number | null {
+    return typeof value === 'number' && Number.isFinite(value) ? value : null
+}
+
+function normalizeMeasurement(measurement: BodyMeasurement): BodyMeasurement {
+    const normalized: BodyMeasurement = {
+        ...measurement,
+        createdAt: measurement.createdAt ?? measurement.date ?? new Date().toISOString(),
+        updatedAt: measurement.updatedAt ?? measurement.createdAt ?? measurement.date ?? new Date().toISOString(),
+    }
+
+    for (const field of NUMERIC_FIELDS) {
+        normalized[field] = normalizeNumericValue(measurement[field])
+    }
+
+    return normalized
+}
+
+function normalizeMeasurementPayload(measurement: BodyMeasurementInput | BodyMeasurementUpdate) {
+    const normalizedPayload: BodyMeasurementInput | BodyMeasurementUpdate = {
+        ...measurement,
+    }
+
+    for (const field of NUMERIC_FIELDS) {
+        normalizedPayload[field] = normalizeNumericValue(measurement[field])
+    }
+
+    return normalizedPayload
+}
+
 function safeParse(raw: string | null): BodyMeasurement[] {
     if (!raw) return []
     try {
         const parsed = JSON.parse(raw)
-        if (Array.isArray(parsed)) return parsed as BodyMeasurement[]
+        if (Array.isArray(parsed)) return (parsed as BodyMeasurement[]).map(normalizeMeasurement)
     } catch (error) {
         console.warn('Failed to parse body measurements', error)
     }
@@ -87,10 +120,10 @@ function beginRemoteSync(userId: string) {
         (snapshot) => {
             const nextMeasurements = snapshot.docs.map((item) => {
                 const data = item.data() as Omit<BodyMeasurement, 'id'>
-                return {
+                return normalizeMeasurement({
                     ...data,
                     id: item.id,
-                }
+                })
             })
 
             emitMeasurements(nextMeasurements, { persistLocal: false })
@@ -178,7 +211,12 @@ export async function saveMeasurement(entry: BodyMeasurementInput): Promise<Body
 
     const now = new Date().toISOString()
     const id = 'm-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8)
-    const full: BodyMeasurement = { ...entry, id, createdAt: now, updatedAt: now }
+    const full = normalizeMeasurement({
+        ...normalizeMeasurementPayload(entry),
+        id,
+        createdAt: now,
+        updatedAt: now,
+    } as BodyMeasurement)
 
     if (canUseFirestoreMeasurements()) {
         const userId = getActiveUserId() as string
@@ -197,18 +235,18 @@ export async function updateMeasurement(id: string, updates: BodyMeasurementUpda
     const existing = getMeasurementById(id)
     if (!existing) return null
 
-    const updated: BodyMeasurement = {
+    const updated = normalizeMeasurement({
         ...existing,
-        ...updates,
+        ...normalizeMeasurementPayload(updates),
         id: existing.id,
         createdAt: existing.createdAt,
         updatedAt: new Date().toISOString(),
-    }
+    })
 
     if (canUseFirestoreMeasurements()) {
         const userId = getActiveUserId() as string
         await updateDoc(doc(db!, 'users', userId, 'bodyMeasurements', id), {
-            ...updates,
+            ...normalizeMeasurementPayload(updates),
             updatedAt: updated.updatedAt,
         })
         upsertMeasurementInCache(updated)
