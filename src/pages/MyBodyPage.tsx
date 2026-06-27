@@ -120,7 +120,7 @@ export default function MyBodyPage() {
                     Poznámka
                     <textarea value={note} onChange={(ev) => setNote(ev.target.value)} />
                 </label>
-                <div style={{display:'flex',gap:8}}>
+                <div style={{ display: 'flex', gap: 8 }}>
                     <button type="submit" className="primary">{editingId ? 'Uložit' : 'Přidat měření'}</button>
                     {editingId && <button type="button" onClick={resetForm}>Zrušit</button>}
                 </div>

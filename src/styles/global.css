@@ -263,7 +263,23 @@ body {
 }
 
 /* Body measurement form styles */
-.body-form .entry-form{margin-top:8px}
-.body-form input,.body-form textarea{padding:8px;border-radius:6px;border:1px solid #e6eef8}
-.body-form label{display:flex;flex-direction:column;font-size:13px}
-.body-form textarea{min-height:64px}
+.body-form .entry-form {
+    margin-top: 8px
+}
+
+.body-form input,
+.body-form textarea {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #e6eef8
+}
+
+.body-form label {
+    display: flex;
+    flex-direction: column;
+    font-size: 13px
+}
+
+.body-form textarea {
+    min-height: 64px
+}
