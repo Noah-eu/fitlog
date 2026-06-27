@@ -26,6 +26,17 @@ Suggested exercise template fields (frontend/local exercise shape)
 - recommendedReps?: string
 - recommendedSets?: string
 
+Local workout entry shape (stored in browser/local storage for MVP):
+- id: string
+- exerciseId: string
+- date: string (ISO date)
+- weight?: number
+- reps?: number
+- sets?: number
+- difficulty?: 'lehké' | 'akorát' | 'těžké'
+- note?: string
+- createdAt: string (ISO timestamp)
+
 - `users/{userId}/workouts/{workoutId}`
   - id: string
   - date: timestamp

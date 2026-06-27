@@ -22,6 +22,9 @@ Local source map (read these next when editing UI or routing)
 - src/pages/MyBodyPage.tsx
 - src/pages/SettingsPage.tsx
 - src/styles/global.css
+ - src/types/workout.ts
+ - src/services/workoutStorage.ts
+ - src/pages/ExerciseDetailPage.tsx
 
 How Copilot should operate
 - Always read APP_PLAN.md and the listed docs before making changes.
