@@ -156,16 +156,16 @@ export default function ExerciseDetailPage() {
                         <div className="recent-entries">
                             <h3>Nedávné</h3>
                             <ul>
-                                            {entries.map((en) => (
-                                                <li key={en.id} className="entry-item">
-                                                    <div className="entry-meta">{new Date(en.date).toLocaleDateString()} • {en.sets ?? '-'}×{en.reps ?? '-'} • {en.weight ?? '-'} kg</div>
-                                                    <div className="entry-note">{en.note}</div>
-                                                    <div className="entry-actions">
-                                                        <button onClick={() => startEdit(en)}>Upravit</button>
-                                                        <button onClick={() => handleDelete(en.id)}>Smazat</button>
-                                                    </div>
-                                                </li>
-                                            ))}
+                                {entries.map((en) => (
+                                    <li key={en.id} className="entry-item">
+                                        <div className="entry-meta">{new Date(en.date).toLocaleDateString()} • {en.sets ?? '-'}×{en.reps ?? '-'} • {en.weight ?? '-'} kg</div>
+                                        <div className="entry-note">{en.note}</div>
+                                        <div className="entry-actions">
+                                            <button onClick={() => startEdit(en)}>Upravit</button>
+                                            <button onClick={() => handleDelete(en.id)}>Smazat</button>
+                                        </div>
+                                    </li>
+                                ))}
                             </ul>
                         </div>
                     )}

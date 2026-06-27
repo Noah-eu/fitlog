@@ -180,17 +180,20 @@ body {
     gap: 8px;
     margin-top: 8px;
 }
+
 .entry-actions button {
     background: none;
     border: 1px solid #e6eef8;
     padding: 6px 8px;
     border-radius: 6px;
 }
+
 .edit-form {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
+
 .edit-actions {
     display: flex;
     gap: 8px;
