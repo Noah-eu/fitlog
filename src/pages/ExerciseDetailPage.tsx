@@ -18,6 +18,12 @@ export default function ExerciseDetailPage() {
     const navigate = useNavigate()
     const ex = exercises.find((e) => e.id === id)
 
+    function hasRouterHistory() {
+        if (typeof window === 'undefined') return false
+        const state = window.history.state as { idx?: number } | null
+        return typeof state?.idx === 'number' && state.idx > 0
+    }
+
     if (!ex) {
         return (
             <div className="page">
@@ -83,7 +89,11 @@ export default function ExerciseDetailPage() {
             setSetsVal('')
             setNote('')
             if (!wasEditing) {
-                navigate('/exercises')
+                if (hasRouterHistory()) {
+                    navigate(-1)
+                } else {
+                    navigate('/exercises', { replace: true })
+                }
             }
         } catch (error) {
             setSaveError(error instanceof Error ? error.message : 'Nepodařilo se uložit výkon.')
