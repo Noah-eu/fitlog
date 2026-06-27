@@ -19,3 +19,9 @@ Build for production:
 ```bash
 npm run build
 ```
+
+Netlify
+
+To deploy on Netlify, set the build command to `npm run build` and the publish directory to `dist`.
+The repository includes `netlify.toml` for a SPA redirect fallback so client-side routes work after refresh.
+
