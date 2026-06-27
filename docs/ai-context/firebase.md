@@ -23,4 +23,5 @@ Local auth foundation
 
 - The codebase includes a minimal Firebase Auth foundation (modular SDK): `src/firebase/config.ts`, `src/services/authService.ts`, and `src/context/AuthContext.tsx`.
 - `LoginPage` at `/login` provides email/password sign-in; protected routes redirect to login when signed out.
+- Missing or placeholder `VITE_FIREBASE_*` values should not crash the app; instead, auth surfaces a setup screen that points to `.env.local` and Netlify Environment variables.
 - No Firestore sync implemented yet; localStorage workout and body data remain unchanged.

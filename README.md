@@ -35,3 +35,5 @@ To enable Firebase Authentication locally, create a `.env.local` with the follow
 
 After setting env vars, run the app normally with `npm run dev`.
 
+If `VITE_FIREBASE_*` values are missing, empty, or still placeholders, the app now shows a setup screen instead of crashing. On Netlify, set the same variables in Site configuration -> Environment variables.
+

@@ -1,10 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { onAuthChanged, signIn, signOutUser } from '../services/authService'
+import { Navigate } from 'react-router-dom'
+import { getFirebaseConfigError, isFirebaseConfigured } from '../firebase/config'
+import { getAuthSetupError, onAuthChanged, signIn, signOutUser } from '../services/authService'
 import type { User } from 'firebase/auth'
 
 type AuthContextValue = {
     user: User | null
     loading: boolean
+    setupError: string | null
     login: (email: string, password: string) => Promise<void>
     logout: () => Promise<void>
 }
@@ -13,18 +16,42 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null)
-    const [loading, setLoading] = useState(true)
+    const [setupError, setSetupError] = useState<string | null>(getFirebaseConfigError())
+    const [loading, setLoading] = useState(() => isFirebaseConfigured())
 
     useEffect(() => {
-        const unsub = onAuthChanged((u) => {
-            setUser(u)
+        if (!isFirebaseConfigured()) {
             setLoading(false)
-        })
+            return
+        }
+
+        const unsub = onAuthChanged(
+            (u) => {
+                setUser(u)
+                setLoading(false)
+            },
+            (error) => {
+                const message = getAuthSetupError(error)
+                if (message) {
+                    setSetupError(message)
+                }
+                setLoading(false)
+            }
+        )
+
         return () => unsub()
     }, [])
 
     async function login(email: string, password: string) {
-        await signIn(email, password)
+        try {
+            await signIn(email, password)
+        } catch (error) {
+            const message = getAuthSetupError(error)
+            if (message) {
+                setSetupError(message)
+            }
+            throw error
+        }
     }
 
     async function logout() {
@@ -32,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout }}>{children}</AuthContext.Provider>
+        <AuthContext.Provider value={{ user, loading, setupError, login, logout }}>{children}</AuthContext.Provider>
     )
 }
 
@@ -42,13 +69,30 @@ export function useAuth() {
     return ctx
 }
 
-export function RequireAuth({ children }: { children: JSX.Element }) {
-    const { user, loading } = useAuth()
+export function FirebaseSetupScreen({ message }: { message?: string | null }) {
+    return (
+        <div className="page setup-page">
+            <div className="setup-card">
+                <h1>Firebase není nastavený</h1>
+                <p>{message ?? 'Aplikace potřebuje platné VITE_FIREBASE_* proměnné, aby bylo možné použít přihlášení.'}</p>
+                <p>Nastavte hodnoty v `.env.local` pro lokální vývoj a v Netlify Environment variables pro nasazení.</p>
+                <div className="setup-code">
+                    VITE_FIREBASE_API_KEY<br />
+                    VITE_FIREBASE_AUTH_DOMAIN<br />
+                    VITE_FIREBASE_PROJECT_ID<br />
+                    VITE_FIREBASE_APP_ID
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export function RequireAuth({ children }: { children: React.ReactElement }) {
+    const { user, loading, setupError } = useAuth()
     if (loading) return <div className="page"><p>Načítám...</p></div>
+    if (setupError) return <FirebaseSetupScreen message={setupError} />
     if (!user) {
-        // client-side redirect to login
-        window.location.href = '/login'
-        return null
+        return <Navigate to="/login" replace />
     }
     return children
 }
