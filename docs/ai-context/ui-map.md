@@ -45,3 +45,6 @@ Current pages (scaffolded)
 
 Navigation
 - Top-level routing is in `src/App.tsx` and the mobile bottom nav is `src/components/BottomNav.tsx`.
+
+My body details
+- `src/pages/MyBodyPage.tsx` supports adding, editing, and deleting local body measurements. Latest measurement summary is shown at the top, history below (newest first).

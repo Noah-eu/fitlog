@@ -37,6 +37,18 @@ Local workout entry shape (stored in browser/local storage for MVP):
 - note?: string
 - createdAt: string (ISO timestamp)
 
+Local body measurement shape (stored in browser/local storage for MVP):
+- id: string
+- date: string (ISO date)
+- bodyWeight?: number
+- chest?: number
+- waist?: number
+- biceps?: number
+- thighs?: number
+- note?: string
+- createdAt: string (ISO timestamp)
+- updatedAt?: string (ISO timestamp)
+
 - `users/{userId}/workouts/{workoutId}`
   - id: string
   - date: timestamp
