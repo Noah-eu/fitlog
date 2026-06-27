@@ -1,55 +1,238 @@
-:root{
-  --bg: #ffffff;
-  --surface: #f8f9fb;
-  --accent: #0b84ff;
-  --text: #0f1720;
+:root {
+    --bg: #ffffff;
+    --surface: #f8f9fb;
+    --accent: #0b84ff;
+    --text: #0f1720;
 }
-*{box-sizing:border-box}
-html,body,#root{height:100%}
-body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;background:var(--bg);color:var(--text)}
 
-.app-shell{display:flex;flex-direction:column;height:100vh}
-.app-header{height:56px;display:flex;align-items:center;padding:0 16px;background:var(--surface);box-shadow:0 1px 0 rgba(0,0,0,0.04);font-weight:600}
-.app-content{flex:1;overflow:auto;padding:16px;padding-bottom:80px}
+* {
+    box-sizing: border-box
+}
 
-.page h1{margin:0 0 8px 0;font-size:20px}
-.page p{margin:0;color:#334155}
+html,
+body,
+#root {
+    height: 100%
+}
 
-.bottom-nav{position:fixed;left:0;right:0;bottom:0;height:64px;display:flex;background:var(--surface);border-top:1px solid rgba(0,0,0,0.06)}
-.bottom-nav .tab{flex:1;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#475569;font-size:13px}
-.bottom-nav .tab.active{color:var(--accent);font-weight:600}
+body {
+    margin: 0;
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+    background: var(--bg);
+    color: var(--text)
+}
+
+.app-shell {
+    display: flex;
+    flex-direction: column;
+    height: 100vh
+}
+
+.app-header {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    background: var(--surface);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+    font-weight: 600
+}
+
+.app-content {
+    flex: 1;
+    overflow: auto;
+    padding: 16px;
+    padding-bottom: 80px
+}
+
+.page h1 {
+    margin: 0 0 8px 0;
+    font-size: 20px
+}
+
+.page p {
+    margin: 0;
+    color: #334155
+}
+
+.bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 64px;
+    display: flex;
+    background: var(--surface);
+    border-top: 1px solid rgba(0, 0, 0, 0.06)
+}
+
+.bottom-nav .tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #475569;
+    font-size: 13px
+}
+
+.bottom-nav .tab.active {
+    color: var(--accent);
+    font-weight: 600
+}
 
 /* make nav touch-friendly */
-.bottom-nav .tab{padding:8px 4px}
-
-@media(min-width:720px){
-  .app-content{max-width:720px;margin:0 auto}
+.bottom-nav .tab {
+    padding: 8px 4px
 }
 
-.exercise-list{display:flex;flex-direction:column;gap:12px;margin-top:12px}
-.exercise-card{display:flex;gap:12px;align-items:center;padding:12px;background:#fff;border-radius:8px;box-shadow:0 1px 0 rgba(16,24,40,0.04);cursor:pointer}
-.exercise-card .thumb{width:64px;height:48px;background:#eef2ff;border-radius:6px}
-.exercise-card .meta{flex:1}
-.exercise-card .name{font-weight:600}
-.exercise-card .cat{font-size:12px;color:#64748b}
-.exercise-card .desc{font-size:13px;color:#475569;margin-top:6px}
+@media(min-width:720px) {
+    .app-content {
+        max-width: 720px;
+        margin: 0 auto
+    }
+}
 
-.exercise-detail{display:flex;flex-direction:column;gap:12px;margin-top:12px}
-.exercise-detail .thumb.large{height:160px;background:#eef2ff;border-radius:8px}
-.exercise-detail .meta{padding:8px}
-.exercise-detail .primary{background:var(--accent);color:white;border:none;padding:10px 12px;border-radius:8px;margin-top:8px}
-.back{background:none;border:none;color:var(--accent);padding:8px 0}
+.exercise-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px
+}
 
-.entry-form{display:flex;flex-direction:column;gap:8px;margin-top:12px}
-.entry-form label{display:flex;flex-direction:column;font-size:13px}
-.entry-form input,.entry-form textarea,.entry-form select{padding:8px;border-radius:6px;border:1px solid #e6eef8}
-.entry-form textarea{min-height:64px}
+.exercise-card {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 12px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 0 rgba(16, 24, 40, 0.04);
+    cursor: pointer
+}
 
-.last-performance{margin-top:12px;padding:8px;background:#f8fafc;border-radius:8px}
+.exercise-card .thumb {
+    width: 64px;
+    height: 48px;
+    background: #eef2ff;
+    border-radius: 6px
+}
 
-.entry-list{display:flex;flex-direction:column;gap:10px;margin-top:12px}
-.entry-item{padding:12px;background:#fff;border-radius:8px;box-shadow:0 1px 0 rgba(16,24,40,0.04)}
-.entry-top{display:flex;justify-content:space-between;align-items:center}
-.entry-title{font-weight:600}
-.entry-meta{font-size:13px;color:#64748b;margin-top:6px}
-.entry-note{font-size:13px;margin-top:6px}
+.exercise-card .meta {
+    flex: 1
+}
+
+.exercise-card .name {
+    font-weight: 600
+}
+
+.exercise-card .cat {
+    font-size: 12px;
+    color: #64748b
+}
+
+.exercise-card .desc {
+    font-size: 13px;
+    color: #475569;
+    margin-top: 6px
+}
+
+.exercise-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px
+}
+
+.exercise-detail .thumb.large {
+    height: 160px;
+    background: #eef2ff;
+    border-radius: 8px
+}
+
+.exercise-detail .meta {
+    padding: 8px
+}
+
+.exercise-detail .primary {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-top: 8px
+}
+
+.back {
+    background: none;
+    border: none;
+    color: var(--accent);
+    padding: 8px 0
+}
+
+.entry-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px
+}
+
+.entry-form label {
+    display: flex;
+    flex-direction: column;
+    font-size: 13px
+}
+
+.entry-form input,
+.entry-form textarea,
+.entry-form select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #e6eef8
+}
+
+.entry-form textarea {
+    min-height: 64px
+}
+
+.last-performance {
+    margin-top: 12px;
+    padding: 8px;
+    background: #f8fafc;
+    border-radius: 8px
+}
+
+.entry-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px
+}
+
+.entry-item {
+    padding: 12px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 0 rgba(16, 24, 40, 0.04)
+}
+
+.entry-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center
+}
+
+.entry-title {
+    font-weight: 600
+}
+
+.entry-meta {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 6px
+}
+
+.entry-note {
+    font-size: 13px;
+    margin-top: 6px
+}
