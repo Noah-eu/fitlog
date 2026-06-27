@@ -13,6 +13,19 @@ Firestore schema (recommended)
   - equipment?: string
   - description?: string
 
+Suggested exercise template fields (frontend/local exercise shape)
+- id: string
+- name: string
+- category: string
+- primaryMuscles: string[]
+- secondaryMuscles?: string[]
+- shortDescription?: string
+- instructions?: string
+- commonMistakes?: string[]
+- imageUrl?: string
+- recommendedReps?: string
+- recommendedSets?: string
+
 - `users/{userId}/workouts/{workoutId}`
   - id: string
   - date: timestamp

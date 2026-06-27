@@ -41,5 +41,7 @@ Current pages (scaffolded)
 - `src/pages/MyBodyPage.tsx` — My body
 - `src/pages/SettingsPage.tsx` — Settings
 
+- `src/pages/ExerciseDetailPage.tsx` — Exercise detail (opened from `Cvičení`)
+
 Navigation
 - Top-level routing is in `src/App.tsx` and the mobile bottom nav is `src/components/BottomNav.tsx`.

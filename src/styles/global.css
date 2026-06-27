@@ -73,72 +73,83 @@ body {
     justify-content: center;
     text-decoration: none;
 
-.exercise-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 12px
-}
-.exercise-card {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    padding: 12px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 1px 0 rgba(16, 24, 40, 0.04);
-    cursor: pointer
-}
-.exercise-card .thumb {
-    width: 64px;
-    height: 48px;
-    background: #eef2ff;
-    border-radius: 6px
-}
-.exercise-card .meta {
-    flex: 1
-}
-.exercise-card .name {
-    font-weight: 600
-}
-.exercise-card .cat {
-    font-size: 12px;
-    color: #64748b
-}
-.exercise-card .desc {
-    font-size: 13px;
-    color: #475569;
-    margin-top: 6px
-}
+    .exercise-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 12px
+    }
 
-.exercise-detail {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 12px
-}
-.exercise-detail .thumb.large {
-    height: 160px;
-    background: #eef2ff;
-    border-radius: 8px
-}
-.exercise-detail .meta {
-    padding: 8px
-}
-.exercise-detail .primary {
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 10px 12px;
-    border-radius: 8px;
-    margin-top: 8px
-}
-.back {
-    background: none;
-    border: none;
-    color: var(--accent);
-    padding: 8px 0
-}
+    .exercise-card {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding: 12px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 1px 0 rgba(16, 24, 40, 0.04);
+        cursor: pointer
+    }
+
+    .exercise-card .thumb {
+        width: 64px;
+        height: 48px;
+        background: #eef2ff;
+        border-radius: 6px
+    }
+
+    .exercise-card .meta {
+        flex: 1
+    }
+
+    .exercise-card .name {
+        font-weight: 600
+    }
+
+    .exercise-card .cat {
+        font-size: 12px;
+        color: #64748b
+    }
+
+    .exercise-card .desc {
+        font-size: 13px;
+        color: #475569;
+        margin-top: 6px
+    }
+
+    .exercise-detail {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 12px
+    }
+
+    .exercise-detail .thumb.large {
+        height: 160px;
+        background: #eef2ff;
+        border-radius: 8px
+    }
+
+    .exercise-detail .meta {
+        padding: 8px
+    }
+
+    .exercise-detail .primary {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 10px 12px;
+        border-radius: 8px;
+        margin-top: 8px
+    }
+
+    .back {
+        background: none;
+        border: none;
+        color: var(--accent);
+        padding: 8px 0
+    }
+
     color: #475569;
     font-size: 13px
 }
