@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import exercises from '../data/exercises'
 import type { WorkoutEntry } from '../types/workout'
 import { deleteEntry, getWorkoutDateKey, saveEntry, subscribeToEntries, toStoredWorkoutDate, updateEntry } from '../services/workoutStorage'
@@ -15,6 +15,7 @@ function todayISODate() {
 
 export default function ExerciseDetailPage() {
     const { id } = useParams<{ id: string }>()
+    const navigate = useNavigate()
     const ex = exercises.find((e) => e.id === id)
 
     if (!ex) {
@@ -51,6 +52,7 @@ export default function ExerciseDetailPage() {
         e.preventDefault()
         if (!ex.id) return
         setSaveError(null)
+        const wasEditing = Boolean(editingId)
 
         try {
             if (editingId) {
@@ -80,6 +82,9 @@ export default function ExerciseDetailPage() {
             setReps('')
             setSetsVal('')
             setNote('')
+            if (!wasEditing) {
+                navigate('/exercises')
+            }
         } catch (error) {
             setSaveError(error instanceof Error ? error.message : 'Nepodařilo se uložit výkon.')
         }
