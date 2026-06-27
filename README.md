@@ -29,3 +29,9 @@ Deployed site
 
 The project is configured for Netlify and the site is available at: https://fitlog-training.netlify.app
 
+Firebase Auth (local development)
+
+To enable Firebase Authentication locally, create a `.env.local` with the following variables (example in `.env.example`). Do not commit real secrets.
+
+After setting env vars, run the app normally with `npm run dev`.
+

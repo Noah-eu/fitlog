@@ -7,11 +7,15 @@ import WorkoutHistoryPage from './pages/WorkoutHistoryPage'
 import MyBodyPage from './pages/MyBodyPage'
 import SettingsPage from './pages/SettingsPage'
 import ExerciseDetailPage from './pages/ExerciseDetailPage'
+import LoginPage from './pages/LoginPage'
+import { RequireAuth } from './context/AuthContext'
 
 export default function App() {
     return (
         <Routes>
-            <Route path="/" element={<AppShell />}>
+            <Route path="/login" element={<LoginPage />} />
+
+            <Route path="/" element={<RequireAuth><AppShell /></RequireAuth>}>
                 <Route index element={<TodayPage />} />
                 <Route path="exercises" element={<ExercisesPage />} />
                 <Route path="exercises/:id" element={<ExerciseDetailPage />} />
@@ -19,6 +23,7 @@ export default function App() {
                 <Route path="body" element={<MyBodyPage />} />
                 <Route path="settings" element={<SettingsPage />} />
             </Route>
+
             <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     )
