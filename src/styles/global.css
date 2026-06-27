@@ -1,0 +1,27 @@
+:root{
+  --bg: #ffffff;
+  --surface: #f8f9fb;
+  --accent: #0b84ff;
+  --text: #0f1720;
+}
+*{box-sizing:border-box}
+html,body,#root{height:100%}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;background:var(--bg);color:var(--text)}
+
+.app-shell{display:flex;flex-direction:column;height:100vh}
+.app-header{height:56px;display:flex;align-items:center;padding:0 16px;background:var(--surface);box-shadow:0 1px 0 rgba(0,0,0,0.04);font-weight:600}
+.app-content{flex:1;overflow:auto;padding:16px;padding-bottom:80px}
+
+.page h1{margin:0 0 8px 0;font-size:20px}
+.page p{margin:0;color:#334155}
+
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;height:64px;display:flex;background:var(--surface);border-top:1px solid rgba(0,0,0,0.06)}
+.bottom-nav .tab{flex:1;display:flex;align-items:center;justify-content:center;text-decoration:none;color:#475569;font-size:13px}
+.bottom-nav .tab.active{color:var(--accent);font-weight:600}
+
+/* make nav touch-friendly */
+.bottom-nav .tab{padding:8px 4px}
+
+@media(min-width:720px){
+  .app-content{max-width:720px;margin:0 auto}
+}
