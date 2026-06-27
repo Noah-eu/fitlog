@@ -30,7 +30,7 @@ export default function TodayPage() {
 
     return (
         <div className="page">
-            <h1>Dnes</h1>
+            <h1>FitLog / Dnes</h1>
 
             {(!latestEntry && !latestMeasurement) ? (
                 <div>

@@ -3,9 +3,12 @@
 Primary screens and key components
 
 - Today / Dashboard
-  - Summary of today's planned/recorded workout
-  - Quick add workout entry button
-  - Mini progress charts (weight, recent PRs)
+ - Today / Dashboard
+  - Summary of today's recorded workout(s): shows latest workout entry (exercise name, date, weight, reps, sets, difficulty)
+  - Latest body measurement summary (weight, waist, chest, date)
+  - Count of workout entries in the last 7 days
+  - Quick action buttons: `Cvičení`, `Deník`, `Moje tělo`
+  - Empty-state message when no data present
 
 - Exercises
   - List grouped by `muscleGroup`
