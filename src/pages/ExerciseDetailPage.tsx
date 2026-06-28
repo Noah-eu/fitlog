@@ -15,7 +15,35 @@ function todayISODate() {
 }
 
 function formatChartDate(date: string) {
-    return new Date(date).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })
+    const [year, month, day] = date.split('-').map(Number)
+    if (!year || !month || !day) return date
+    return `${day}. ${month}.`
+}
+
+function getDailyMaxWeightPoints(entries: WorkoutEntry[]) {
+    const dailyMaxByDate = new Map<string, { value: number; orderKey: string }>()
+
+    for (const entry of entries) {
+        if (typeof entry.weight !== 'number' || !Number.isFinite(entry.weight)) continue
+
+        const dayKey = getWorkoutDateKey(entry.date)
+        const orderKey = entry.updatedAt ?? entry.createdAt ?? entry.date
+        const existing = dailyMaxByDate.get(dayKey)
+
+        if (!existing || entry.weight > existing.value || (entry.weight === existing.value && orderKey.localeCompare(existing.orderKey) > 0)) {
+            dailyMaxByDate.set(dayKey, {
+                value: entry.weight,
+                orderKey,
+            })
+        }
+    }
+
+    return Array.from(dailyMaxByDate.entries())
+        .sort(([leftDay], [rightDay]) => leftDay.localeCompare(rightDay))
+        .map(([dayKey, point]) => ({
+            label: formatChartDate(dayKey),
+            value: point.value,
+        }))
 }
 
 export default function ExerciseDetailPage() {
@@ -58,16 +86,7 @@ export default function ExerciseDetailPage() {
     }, [ex.id])
 
     const last = useMemo(() => entries[0], [entries])
-    const chartPoints = useMemo(
-        () => [...entries]
-            .sort((a, b) => a.date.localeCompare(b.date))
-            .map((entry) => ({
-                label: formatChartDate(entry.date),
-                value: entry.weight,
-            }))
-            .filter((point): point is { label: string; value: number } => typeof point.value === 'number' && Number.isFinite(point.value)),
-        [entries],
-    )
+    const chartPoints = useMemo(() => getDailyMaxWeightPoints(entries), [entries])
 
     async function handleSave(e: React.FormEvent) {
         e.preventDefault()
@@ -197,13 +216,13 @@ export default function ExerciseDetailPage() {
                     <section className="chart-section card">
                         <div className="section-heading">
                             <h3>Vývoj výkonu</h3>
-                            <span>Váha v čase</span>
+                            <span>Nejvyšší váha za den</span>
                         </div>
                         <ProgressLineChart
                             points={chartPoints}
                             valueSuffix="kg"
                             emptyStateText="Zatím nemáš žádné váhové záznamy pro tento cvik."
-                            singlePointText="Pro čárový graf přidej ještě jeden záznam tohoto cviku."
+                            singlePointText="Pro čárový graf přidej ještě jeden den s výkonem tohoto cviku."
                         />
                     </section>
 

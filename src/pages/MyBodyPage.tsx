@@ -14,7 +14,40 @@ const MEASUREMENT_METRICS: { key: MeasurementMetricKey; label: string; suffix: s
 ]
 
 function formatChartDate(date: string) {
-    return new Date(date).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })
+    const [year, month, day] = date.split('-').map(Number)
+    if (!year || !month || !day) return date
+    return `${day}. ${month}.`
+}
+
+function getMeasurementDayKey(date: string) {
+    return date.slice(0, 10)
+}
+
+function getDailyMetricPoints(measurements: BodyMeasurement[], metric: MeasurementMetricKey) {
+    const latestValueByDate = new Map<string, { value: number; orderKey: string }>()
+
+    for (const measurement of measurements) {
+        const value = measurement[metric]
+        if (typeof value !== 'number' || !Number.isFinite(value)) continue
+
+        const dayKey = getMeasurementDayKey(measurement.date)
+        const orderKey = measurement.updatedAt ?? measurement.createdAt ?? measurement.date
+        const existing = latestValueByDate.get(dayKey)
+
+        if (!existing || orderKey.localeCompare(existing.orderKey) > 0) {
+            latestValueByDate.set(dayKey, {
+                value,
+                orderKey,
+            })
+        }
+    }
+
+    return Array.from(latestValueByDate.entries())
+        .sort(([leftDay], [rightDay]) => leftDay.localeCompare(rightDay))
+        .map(([dayKey, point]) => ({
+            label: formatChartDate(dayKey),
+            value: point.value,
+        }))
 }
 
 function todayISODate() {
@@ -111,10 +144,7 @@ export default function MyBodyPage() {
     }
 
     const latest = measurements[0]
-    const chartMeasurements = useMemo(
-        () => [...measurements].sort((a, b) => a.date.localeCompare(b.date)),
-        [measurements],
-    )
+    const chartMeasurements = useMemo(() => [...measurements].sort((a, b) => a.date.localeCompare(b.date)), [measurements])
     const metricsWithData = useMemo(
         () => new Set<MeasurementMetricKey>(
             MEASUREMENT_METRICS
@@ -128,15 +158,7 @@ export default function MyBodyPage() {
         return MEASUREMENT_METRICS.find(({ key }) => metricsWithData.has(key))?.key ?? 'bodyWeight'
     }, [metricsWithData])
     const selectedMetricConfig = MEASUREMENT_METRICS.find(({ key }) => key === selectedMetric) ?? MEASUREMENT_METRICS[0]
-    const chartPoints = useMemo(
-        () => chartMeasurements
-            .map((measurement) => ({
-                label: formatChartDate(measurement.date),
-                value: measurement[selectedMetric],
-            }))
-            .filter((point): point is { label: string; value: number } => typeof point.value === 'number' && Number.isFinite(point.value)),
-        [chartMeasurements, selectedMetric],
-    )
+    const chartPoints = useMemo(() => getDailyMetricPoints(chartMeasurements, selectedMetric), [chartMeasurements, selectedMetric])
 
     useEffect(() => {
         if (!metricsWithData.size) return
@@ -199,7 +221,7 @@ export default function MyBodyPage() {
             <section className="chart-section card">
                 <div className="section-heading">
                     <h3>Vývoj</h3>
-                    <span>{selectedMetricConfig.label}</span>
+                    <span>Poslední platná hodnota za den</span>
                 </div>
 
                 <div className="chart-tabs" role="tablist" aria-label="Metriky vývoje těla">
@@ -220,7 +242,7 @@ export default function MyBodyPage() {
                     points={chartPoints}
                     valueSuffix={selectedMetricConfig.suffix}
                     emptyStateText={`Zatím nemáš žádná data pro tuto hodnotu.`}
-                    singlePointText={`Pro čárový graf přidej ještě jedno měření.`}
+                    singlePointText={`Pro čárový graf přidej ještě jeden den měření.`}
                 />
             </section>
 

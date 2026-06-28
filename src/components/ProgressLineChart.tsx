@@ -35,7 +35,7 @@ export default function ProgressLineChart({ points, valueSuffix, emptyStateText,
             <div className="progress-chart">
                 <div className="chart-summary">
                     <div>
-                        <span>Aktuální hodnota</span>
+                        <span>Poslední hodnota</span>
                         <strong>{formatValue(only.value, valueSuffix)}</strong>
                     </div>
                     <div>
@@ -97,7 +97,7 @@ export default function ProgressLineChart({ points, valueSuffix, emptyStateText,
     const firstPoint = points[0]
     const middlePoint = points[Math.floor((points.length - 1) / 2)]
     const lastPoint = points[points.length - 1]
-    const tickPoints = [firstPoint, middlePoint, lastPoint].filter((point, index, all) => all.findIndex((item) => item.label === point.label) === index)
+    const tickIndexes = Array.from(new Set([0, Math.floor((points.length - 1) / 2), points.length - 1]))
 
     return (
         <div className="progress-chart">
@@ -137,8 +137,8 @@ export default function ProgressLineChart({ points, valueSuffix, emptyStateText,
                 <polyline className="chart-line-shadow" points={polylinePoints} />
                 <polyline className="chart-line" points={polylinePoints} />
 
-                {coords.map((point) => (
-                    <g key={`${point.label}-${point.value}`}>
+                {coords.map((point, index) => (
+                    <g key={`${point.label}-${point.value}-${index}`}>
                         <circle cx={point.x} cy={point.y} r="5" className="chart-dot-shadow" />
                         <circle cx={point.x} cy={point.y} r="3.5" className="chart-dot" />
                     </g>
@@ -147,13 +147,11 @@ export default function ProgressLineChart({ points, valueSuffix, emptyStateText,
                 <text x={6} y={PADDING_TOP + 4} className="chart-axis-label">{formatValue(maxValue, valueSuffix)}</text>
                 <text x={6} y={PADDING_TOP + innerHeight + 4} className="chart-axis-label">{formatValue(minValue, valueSuffix)}</text>
 
-                {tickPoints.map((point) => {
-                    const tick = coords.find((item) => item.label === point.label && item.value === point.value)
-                    if (!tick) return null
-
+                {tickIndexes.map((index) => {
+                    const tick = coords[index]
                     return (
-                        <text key={`${point.label}-tick`} x={tick.x} y={CHART_HEIGHT - 8} textAnchor="middle" className="chart-tick-label">
-                            {point.label}
+                        <text key={`tick-${index}`} x={tick.x} y={CHART_HEIGHT - 8} textAnchor="middle" className="chart-tick-label">
+                            {tick.label}
                         </text>
                     )
                 })}
