@@ -219,7 +219,8 @@ export default function MyBodyPage() {
                 <ProgressLineChart
                     points={chartPoints}
                     valueSuffix={selectedMetricConfig.suffix}
-                    emptyStateText={`Pro metriku ${selectedMetricConfig.label.toLowerCase()} přidejte aspoň dvě měření.`}
+                    emptyStateText={`Zatím nemáš žádná data pro tuto hodnotu.`}
+                    singlePointText={`Pro čárový graf přidej ještě jedno měření.`}
                 />
             </section>
 

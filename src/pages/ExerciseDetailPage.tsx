@@ -202,7 +202,8 @@ export default function ExerciseDetailPage() {
                         <ProgressLineChart
                             points={chartPoints}
                             valueSuffix="kg"
-                            emptyStateText="Pro graf výkonu přidejte aspoň dva záznamy s vyplněnou váhou."
+                            emptyStateText="Zatím nemáš žádné váhové záznamy pro tento cvik."
+                            singlePointText="Pro čárový graf přidej ještě jeden záznam tohoto cviku."
                         />
                     </section>
 

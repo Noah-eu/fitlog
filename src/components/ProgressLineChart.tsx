@@ -9,6 +9,7 @@ type ProgressLineChartProps = {
     points: ProgressLineChartPoint[]
     valueSuffix: string
     emptyStateText: string
+    singlePointText?: string
 }
 
 const CHART_WIDTH = 320
@@ -23,9 +24,59 @@ function formatValue(value: number, suffix: string) {
     return `${rounded} ${suffix}`
 }
 
-export default function ProgressLineChart({ points, valueSuffix, emptyStateText }: ProgressLineChartProps) {
-    if (points.length < 2) {
+export default function ProgressLineChart({ points, valueSuffix, emptyStateText, singlePointText }: ProgressLineChartProps) {
+    if (points.length === 0) {
         return <p className="chart-empty">{emptyStateText}</p>
+    }
+
+    if (points.length === 1) {
+        const only = points[0]
+        return (
+            <div className="progress-chart">
+                <div className="chart-summary">
+                    <div>
+                        <span>Aktuální hodnota</span>
+                        <strong>{formatValue(only.value, valueSuffix)}</strong>
+                    </div>
+                    <div>
+                        <span>Rozsah</span>
+                        <strong>{formatValue(only.value, valueSuffix)} - {formatValue(only.value, valueSuffix)}</strong>
+                    </div>
+                </div>
+
+                <svg viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`} className="chart-svg" aria-hidden="true" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="progress-line-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="rgba(225, 29, 47, 1)" />
+                            <stop offset="100%" stopColor="rgba(242, 194, 48, 1)" />
+                        </linearGradient>
+                    </defs>
+                    {([0, 0.5, 1] as number[]).map((ratio) => {
+                        const innerHeight = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM
+                        const y = PADDING_TOP + innerHeight * ratio
+                        return (
+                            <line
+                                key={ratio}
+                                x1={PADDING_LEFT}
+                                y1={y}
+                                x2={CHART_WIDTH - PADDING_RIGHT}
+                                y2={y}
+                                className="chart-grid-line"
+                            />
+                        )
+                    })}
+
+                    {/* single dot centered horizontally */}
+                    <circle cx={PADDING_LEFT + (CHART_WIDTH - PADDING_LEFT - PADDING_RIGHT) / 2} cy={(CHART_HEIGHT) / 2} r="5" className="chart-dot-shadow" />
+                    <circle cx={PADDING_LEFT + (CHART_WIDTH - PADDING_LEFT - PADDING_RIGHT) / 2} cy={(CHART_HEIGHT) / 2} r="3.5" className="chart-dot" />
+
+                    <text x={6} y={PADDING_TOP + 4} className="chart-axis-label">{formatValue(only.value, valueSuffix)}</text>
+                    <text x={6} y={CHART_HEIGHT - PADDING_BOTTOM + 6} className="chart-axis-label">{formatValue(only.value, valueSuffix)}</text>
+                </svg>
+
+                {singlePointText ? <p className="chart-single-note small">{singlePointText}</p> : null}
+            </div>
+        )
     }
 
     const values = points.map((point) => point.value)
