@@ -814,7 +814,7 @@ const exercises: Exercise[] = [
         shortDescription: 'Strojová abdukce pro boční část hýždí a stabilitu kyčlí.',
         instructions: 'Sedněte si vzpřímeně a tlačte nohy od sebe proti odporu stroje bez houpání trupem.',
         commonMistakes: ['Používání švihu', 'Příliš těžká váha', 'Zvedání ramen'],
-        imageUrl: '/images/exercises/unozovani na stroji.png',
+        imageUrl: '/images/exercises/unozovani.na.stroji.png',
         recommendedReps: '10-20',
         recommendedSets: '3-4',
     },
