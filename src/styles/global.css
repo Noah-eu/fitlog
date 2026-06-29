@@ -612,6 +612,23 @@ button:not(.primary):not(.back-button) {
     border-color: rgba(255, 255, 255, 0.18);
 }
 
+.subcategory-tabs {
+    margin-top: -2px;
+}
+
+.subcategory-tabs .tab {
+    padding: 8px 12px;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(242, 194, 48, 0.14);
+}
+
+.subcategory-tabs .tab.active {
+    background: linear-gradient(90deg, rgba(242, 194, 48, 0.2), rgba(225, 29, 47, 0.18));
+    border-color: rgba(242, 194, 48, 0.42);
+    box-shadow: 0 8px 20px rgba(242, 194, 48, 0.12);
+}
+
 .workout-calendar {
     display: flex;
     flex-direction: column;

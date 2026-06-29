@@ -17,6 +17,7 @@ Suggested exercise template fields (frontend/local exercise shape)
 - id: string
 - name: string
 - category: string
+- subcategory?: string
 - primaryMuscles: string[]
 - secondaryMuscles?: string[]
 - shortDescription?: string
@@ -86,5 +87,6 @@ Body measurement storage
 
 Notes
 - Storing `exercises` as a global collection keeps templates separate from personal progress.
+- Exercise templates may include an optional `subcategory` string for second-level filtering within each main exercise category.
 - Workout entries stay separate from exercise templates and are always scoped by `userId`.
 - Body measurements are personal records and are always scoped by `userId`.

@@ -163,7 +163,7 @@ export default function ExerciseDetailPage() {
                     {ex.imageUrl ? <img src={ex.imageUrl} alt={ex.name} /> : null}
                 </div>
                 <div className="meta">
-                    <div className="cat">{ex.category}</div>
+                    <div className="cat">{ex.subcategory ? `${ex.category} • ${ex.subcategory}` : ex.category}</div>
                     <p><strong>Primární svaly:</strong> {ex.primaryMuscles.join(', ')}</p>
                     {ex.secondaryMuscles && ex.secondaryMuscles.length > 0 && (
                         <p><strong>Sekundární svaly:</strong> {ex.secondaryMuscles.join(', ')}</p>

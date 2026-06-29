@@ -14,6 +14,7 @@ Primary screens and key components
 
 - Exercises
   - List grouped by `muscleGroup`
+  - Main category tabs plus second-level subcategory chips with `Vše` fallback
   - Search and filter
 
 - Exercise detail

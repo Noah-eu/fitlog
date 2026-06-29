@@ -7,6 +7,8 @@ type Props = {
 }
 
 export default function ExerciseCard({ exercise, onOpen }: Props) {
+    const metaLabel = exercise.subcategory ? `${exercise.category} • ${exercise.subcategory}` : exercise.category
+
     return (
         <article className="exercise-card" onClick={() => onOpen(exercise.id)}>
             <div className="thumb" aria-hidden={exercise.imageUrl ? false : true}>
@@ -16,7 +18,7 @@ export default function ExerciseCard({ exercise, onOpen }: Props) {
             </div>
             <div className="meta">
                 <div className="name">{exercise.name}</div>
-                <div className="cat">{exercise.category}</div>
+                <div className="cat">{metaLabel}</div>
                 <div className="desc">{exercise.shortDescription}</div>
             </div>
         </article>
