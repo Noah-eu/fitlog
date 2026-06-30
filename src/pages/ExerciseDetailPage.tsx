@@ -89,6 +89,7 @@ export default function ExerciseDetailPage() {
     const [editingId, setEditingId] = useState<string | null>(null)
     const [saveError, setSaveError] = useState<string | null>(null)
     const [autoFilledEntryId, setAutoFilledEntryId] = useState<string | null>(null)
+    const [isSaving, setIsSaving] = useState(false)
 
     function getEntryPayload() {
         return {
@@ -145,14 +146,17 @@ export default function ExerciseDetailPage() {
     function handleUseLastPerformance(event?: React.MouseEvent<HTMLButtonElement>) {
         event?.preventDefault()
         if (!last) return
+        setSaveError(null)
         applyPerformanceValues(last)
         setAutoFilledEntryId(last.id)
     }
 
-    async function handleSave(e: React.FormEvent) {
-        e.preventDefault()
+    async function handlePersistEntry() {
         if (!ex.id) return
+        if (isSaving) return
+
         setSaveError(null)
+        setIsSaving(true)
         const wasEditing = Boolean(editingId)
 
         try {
@@ -172,7 +176,19 @@ export default function ExerciseDetailPage() {
                 }
             }
         } catch (error) {
+            console.error('Failed to save workout entry from ExerciseDetailPage', {
+                exerciseId: ex.id,
+                editingId,
+                date,
+                weight,
+                reps,
+                sets: setsVal,
+                difficulty,
+                error,
+            })
             setSaveError(error instanceof Error ? error.message : 'Nepodařilo se uložit výkon.')
+        } finally {
+            setIsSaving(false)
         }
     }
 
@@ -196,6 +212,11 @@ export default function ExerciseDetailPage() {
         try {
             await deleteEntry(id)
         } catch (error) {
+            console.error('Failed to delete workout entry from ExerciseDetailPage', {
+                exerciseId: ex.id,
+                entryId: id,
+                error,
+            })
             setSaveError(error instanceof Error ? error.message : 'Nepodařilo se smazat záznam.')
         }
     }
@@ -250,7 +271,7 @@ export default function ExerciseDetailPage() {
                             </div>
                         ) : null}
 
-                        <form className="entry-form" onSubmit={handleSave} noValidate>
+                        <div className="entry-form">
                             <div className="entry-form-grid">
                                 <label>
                                     Datum
@@ -283,7 +304,9 @@ export default function ExerciseDetailPage() {
                             </div>
 
                             <div className="entry-form-actions">
-                                <button type="submit" className="primary">Uložit výkon</button>
+                                <button type="button" className="primary" onClick={handlePersistEntry} disabled={isSaving}>
+                                    {isSaving ? 'Ukládám...' : 'Uložit výkon'}
+                                </button>
                                 {last ? (
                                     <button type="button" onClick={handleUseLastPerformance}>Použít minule</button>
                                 ) : null}
@@ -293,7 +316,7 @@ export default function ExerciseDetailPage() {
                             </div>
 
                             {saveError ? <div className="form-error">{saveError}</div> : null}
-                        </form>
+                        </div>
                     </section>
 
                     <div className="exercise-detail-copy">
