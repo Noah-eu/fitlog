@@ -63,8 +63,9 @@ export default function WorkoutCalendar({ month, selectedDateKey, highlightedDat
                     const isToday = dateKey === todayDateKey
                     const className = [
                         'calendar-day',
+                        'selectable-chip',
                         hasEntries ? 'has-entries' : '',
-                        isSelected ? 'selected' : '',
+                        isSelected ? 'selected selectable-chip--active' : '',
                         isToday ? 'today' : '',
                     ].filter(Boolean).join(' ')
 

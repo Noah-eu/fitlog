@@ -229,7 +229,7 @@ export default function MyBodyPage() {
                         <button
                             key={metric.key}
                             type="button"
-                            className={`chart-tab ${metric.key === selectedMetric ? 'active' : ''}`}
+                            className={`chart-tab selectable-chip ${metric.key === selectedMetric ? 'selectable-chip--active active' : ''}`}
                             onClick={() => setSelectedMetric(metric.key)}
                             aria-pressed={metric.key === selectedMetric}
                         >

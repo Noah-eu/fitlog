@@ -16,7 +16,7 @@ export default function CategoryTabs({ categories, value, onChange, className }:
                 <button
                     type="button"
                     key={c}
-                    className={c === value ? 'tab active' : 'tab'}
+                    className={c === value ? 'tab selectable-chip selectable-chip--active' : 'tab selectable-chip'}
                     onClick={() => onChange(c)}
                 >
                     {c}

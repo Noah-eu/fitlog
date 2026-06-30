@@ -160,7 +160,7 @@ export default function SettingsPage() {
                                         key={category}
                                         type="button"
                                         aria-pressed={active}
-                                        className={`settings-chip${active ? ' active' : ''}`}
+                                        className={`settings-chip selectable-chip${active ? ' selectable-chip--active active' : ''}`}
                                         onClick={() => handleToggleCategory(category)}
                                     >
                                         {category}
