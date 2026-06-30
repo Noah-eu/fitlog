@@ -220,9 +220,48 @@ export async function saveTrainingPreferences(input: Partial<TrainingPreferences
         updatedAt: new Date().toISOString(),
     })
 
+    function removeUndefinedFields<T extends Record<string, any>>(obj: T): Record<string, any> {
+        const out: Record<string, any> = {}
+
+        for (const [key, val] of Object.entries(obj)) {
+            if (val === undefined) continue
+
+            if (val === null) {
+                out[key] = null
+                continue
+            }
+
+            if (Array.isArray(val)) {
+                out[key] = val.filter((x) => x !== undefined)
+                continue
+            }
+
+            if (typeof val === 'object') {
+                // sanitize nested object (used for enabledSubcategoriesByCategory)
+                const nested = Object.entries(val as Record<string, any>)
+                    .map(([k, v]) => [k, Array.isArray(v) ? (v as any[]).filter((x) => x !== undefined) : v])
+                    .filter(([, v]) => v !== undefined && ( !(Array.isArray(v) && (v as any[]).length === 0) ))
+
+                if (nested.length > 0) {
+                    out[key] = Object.fromEntries(nested as [string, any][])
+                } else {
+                    // omit empty nested objects
+                }
+
+                continue
+            }
+
+            out[key] = val
+        }
+
+        return out
+    }
+
+    const payload = removeUndefinedFields(nextPreferences as any)
+
     if (canUseFirestoreTrainingPreferences()) {
         const userId = getActiveUserId() as string
-        await setDoc(doc(db!, 'users', userId, 'settings', SETTINGS_DOC_ID), nextPreferences)
+        await setDoc(doc(db!, 'users', userId, 'settings', SETTINGS_DOC_ID), payload)
         emitTrainingPreferences(nextPreferences)
         return nextPreferences
     }
