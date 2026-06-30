@@ -90,6 +90,18 @@ export default function ExerciseDetailPage() {
     const [saveError, setSaveError] = useState<string | null>(null)
     const [autoFilledEntryId, setAutoFilledEntryId] = useState<string | null>(null)
 
+    function getEntryPayload() {
+        return {
+            exerciseId: ex.id,
+            date: toStoredWorkoutDate(date),
+            weight: typeof weight === 'number' && Number.isFinite(weight) ? weight : undefined,
+            reps: typeof reps === 'number' && Number.isFinite(reps) ? reps : undefined,
+            sets: typeof setsVal === 'number' && Number.isFinite(setsVal) ? setsVal : undefined,
+            difficulty,
+            note,
+        }
+    }
+
     function applyPerformanceValues(source?: Pick<WorkoutEntry, 'weight' | 'reps' | 'sets'>) {
         setWeight(source?.weight ?? '')
         setReps(source?.reps ?? '')
@@ -130,7 +142,8 @@ export default function ExerciseDetailPage() {
         setAutoFilledEntryId(last.id)
     }, [autoFilledEntryId, editingId, last, reps, setsVal, weight])
 
-    function handleUseLastPerformance() {
+    function handleUseLastPerformance(event?: React.MouseEvent<HTMLButtonElement>) {
+        event?.preventDefault()
         if (!last) return
         applyPerformanceValues(last)
         setAutoFilledEntryId(last.id)
@@ -144,26 +157,10 @@ export default function ExerciseDetailPage() {
 
         try {
             if (editingId) {
-                await updateEntry(editingId, {
-                    exerciseId: ex.id,
-                    date: toStoredWorkoutDate(date),
-                    weight: typeof weight === 'number' && !Number.isNaN(weight) ? weight : undefined,
-                    reps: typeof reps === 'number' && !Number.isNaN(reps) ? reps : undefined,
-                    sets: typeof setsVal === 'number' && !Number.isNaN(setsVal) ? setsVal : undefined,
-                    difficulty,
-                    note,
-                })
+                await updateEntry(editingId, getEntryPayload())
                 setEditingId(null)
             } else {
-                await saveEntry({
-                    exerciseId: ex.id,
-                    date: toStoredWorkoutDate(date),
-                    weight: typeof weight === 'number' && !Number.isNaN(weight) ? weight : undefined,
-                    reps: typeof reps === 'number' && !Number.isNaN(reps) ? reps : undefined,
-                    sets: typeof setsVal === 'number' && !Number.isNaN(setsVal) ? setsVal : undefined,
-                    difficulty,
-                    note,
-                })
+                await saveEntry(getEntryPayload())
             }
 
             resetEntryForm()
@@ -253,7 +250,7 @@ export default function ExerciseDetailPage() {
                             </div>
                         ) : null}
 
-                        <form className="entry-form" onSubmit={handleSave}>
+                        <form className="entry-form" onSubmit={handleSave} noValidate>
                             <div className="entry-form-grid">
                                 <label>
                                     Datum
@@ -300,14 +297,14 @@ export default function ExerciseDetailPage() {
                     </section>
 
                     <div className="exercise-detail-copy">
-                    <p><strong>Primární svaly:</strong> {ex.primaryMuscles.join(', ')}</p>
-                    {ex.secondaryMuscles && ex.secondaryMuscles.length > 0 && (
-                        <p><strong>Sekundární svaly:</strong> {ex.secondaryMuscles.join(', ')}</p>
-                    )}
-                    <p><strong>Instrukce:</strong> {ex.instructions}</p>
-                    <p><strong>Časté chyby:</strong> {ex.commonMistakes.join('; ')}</p>
-                    <p><strong>Doporučené opakování:</strong> {ex.recommendedReps}</p>
-                    <p><strong>Doporučené série:</strong> {ex.recommendedSets}</p>
+                        <p><strong>Primární svaly:</strong> {ex.primaryMuscles.join(', ')}</p>
+                        {ex.secondaryMuscles && ex.secondaryMuscles.length > 0 && (
+                            <p><strong>Sekundární svaly:</strong> {ex.secondaryMuscles.join(', ')}</p>
+                        )}
+                        <p><strong>Instrukce:</strong> {ex.instructions}</p>
+                        <p><strong>Časté chyby:</strong> {ex.commonMistakes.join('; ')}</p>
+                        <p><strong>Doporučené opakování:</strong> {ex.recommendedReps}</p>
+                        <p><strong>Doporučené série:</strong> {ex.recommendedSets}</p>
                     </div>
 
                     <section className="chart-section card">
@@ -332,8 +329,8 @@ export default function ExerciseDetailPage() {
                                         <div className="entry-meta">{new Date(en.date).toLocaleDateString('cs-CZ')} • {en.sets ?? '-'}×{en.reps ?? '-'} • {en.weight ?? '-'} kg</div>
                                         <div className="entry-note">{en.note}</div>
                                         <div className="entry-actions">
-                                            <button onClick={() => startEdit(en)}>Upravit</button>
-                                            <button onClick={() => handleDelete(en.id)}>Smazat</button>
+                                            <button type="button" onClick={() => startEdit(en)}>Upravit</button>
+                                            <button type="button" onClick={() => handleDelete(en.id)}>Smazat</button>
                                         </div>
                                     </li>
                                 ))}

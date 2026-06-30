@@ -501,7 +501,7 @@ body {
     gap: 8px;
 }
 
-.entry-form-actions > * {
+.entry-form-actions>* {
     flex: 1 1 180px;
 }
 
