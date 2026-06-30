@@ -240,7 +240,7 @@ export async function saveTrainingPreferences(input: Partial<TrainingPreferences
                 // sanitize nested object (used for enabledSubcategoriesByCategory)
                 const nested = Object.entries(val as Record<string, any>)
                     .map(([k, v]) => [k, Array.isArray(v) ? (v as any[]).filter((x) => x !== undefined) : v])
-                    .filter(([, v]) => v !== undefined && ( !(Array.isArray(v) && (v as any[]).length === 0) ))
+                    .filter(([, v]) => v !== undefined && (!(Array.isArray(v) && (v as any[]).length === 0)))
 
                 if (nested.length > 0) {
                     out[key] = Object.fromEntries(nested as [string, any][])

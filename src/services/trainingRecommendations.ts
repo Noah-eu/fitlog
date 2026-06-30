@@ -1,6 +1,7 @@
 import type { Exercise } from '../types/exercise'
 import type { TrainingPreferences } from '../types/trainingPreferences'
 import type { WorkoutEntry } from '../types/workout'
+import { resolveExerciseId } from '../data/exercises'
 import { getWorkoutDateKey } from './workoutStorage'
 
 export type TrainingRecommendation = {
@@ -35,10 +36,11 @@ function isWithinRecentWindow(dateKey: string | null, days: number) {
 
 function buildLastUsedDateMap(entries: WorkoutEntry[]) {
     return entries.reduce<Map<string, string>>((map, entry) => {
+        const canonicalExerciseId = resolveExerciseId(entry.exerciseId)
         const nextDayKey = getWorkoutDateKey(entry.date)
-        const existing = map.get(entry.exerciseId)
+        const existing = map.get(canonicalExerciseId)
         if (!existing || nextDayKey > existing) {
-            map.set(entry.exerciseId, nextDayKey)
+            map.set(canonicalExerciseId, nextDayKey)
         }
         return map
     }, new Map())

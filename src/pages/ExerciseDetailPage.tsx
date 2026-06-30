@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import exercises from '../data/exercises'
+import { findExerciseById, getEquivalentExerciseIds } from '../data/exercises'
 import type { WorkoutEntry } from '../types/workout'
 import { deleteEntry, getWorkoutDateKey, saveEntry, subscribeToEntries, toStoredWorkoutDate, updateEntry } from '../services/workoutStorage'
 import BackButton from '../components/BackButton'
@@ -49,7 +49,7 @@ function getDailyMaxWeightPoints(entries: WorkoutEntry[]) {
 export default function ExerciseDetailPage() {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
-    const ex = exercises.find((e) => e.id === id)
+    const ex = findExerciseById(id ?? '')
 
     function hasRouterHistory() {
         if (typeof window === 'undefined') return false
@@ -80,8 +80,10 @@ export default function ExerciseDetailPage() {
     useEffect(() => {
         if (!ex.id) return
 
+        const relatedExerciseIds = new Set(getEquivalentExerciseIds(ex.id))
+
         return subscribeToEntries((allEntries) => {
-            setEntries(allEntries.filter((entry) => entry.exerciseId === ex.id))
+            setEntries(allEntries.filter((entry) => relatedExerciseIds.has(entry.exerciseId)))
         })
     }, [ex.id])
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { deleteEntry, getWorkoutDateKey, subscribeToEntries, toStoredWorkoutDate, updateEntry } from '../services/workoutStorage'
 import type { WorkoutEntry } from '../types/workout'
-import exercises from '../data/exercises'
+import { findExerciseById } from '../data/exercises'
 import WorkoutCalendar from '../components/WorkoutCalendar'
 
 function toDateKey(date: Date) {
@@ -126,7 +126,7 @@ export default function WorkoutHistoryPage() {
 
 
     function nameFor(id: string) {
-        const ex = exercises.find((e) => e.id === id)
+        const ex = findExerciseById(id)
         return ex ? ex.name : id
     }
 

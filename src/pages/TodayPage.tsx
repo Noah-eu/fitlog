@@ -5,7 +5,7 @@ import { subscribeToMeasurements } from '../services/bodyMeasurementStorage'
 import { buildTodayRecommendations } from '../services/trainingRecommendations'
 import type { TrainingRecommendation } from '../services/trainingRecommendations'
 import { getDefaultTrainingPreferences, subscribeToTrainingPreferences } from '../services/trainingPreferencesStorage'
-import exercises from '../data/exercises'
+import exercises, { findExerciseById, resolveExerciseId } from '../data/exercises'
 import type { BodyMeasurement } from '../types/body'
 import type { WorkoutEntry } from '../types/workout'
 
@@ -32,10 +32,6 @@ function isDateKeyWithinLastDays(dateKey: string, days: number) {
     return entryDay >= cutoff && entryDay <= today
 }
 
-function buildExerciseNameMap() {
-    return new Map(exercises.map((exercise) => [exercise.id, exercise.name]))
-}
-
 function buildActivitySummary(entries: WorkoutEntry[]) {
     const uniqueDays = new Set(entries.map((entry) => getWorkoutDateKey(entry.date)))
     const sortedUniqueDays = Array.from(uniqueDays).sort((left, right) => right.localeCompare(left))
@@ -54,9 +50,11 @@ function buildPersonalRecords(entries: WorkoutEntry[]) {
     entries.forEach((entry) => {
         if (typeof entry.weight !== 'number' || !Number.isFinite(entry.weight)) return
 
-        const existing = byExercise.get(entry.exerciseId)
+        const canonicalExerciseId = resolveExerciseId(entry.exerciseId)
+
+        const existing = byExercise.get(canonicalExerciseId)
         if (!existing) {
-            byExercise.set(entry.exerciseId, entry)
+            byExercise.set(canonicalExerciseId, entry)
             return
         }
 
@@ -66,16 +64,14 @@ function buildPersonalRecords(entries: WorkoutEntry[]) {
             || (entry.weight === existing.weight && nextOrderKey.localeCompare(existingOrderKey) > 0)
 
         if (shouldReplace) {
-            byExercise.set(entry.exerciseId, entry)
+            byExercise.set(canonicalExerciseId, entry)
         }
     })
 
-    const exerciseNameById = buildExerciseNameMap()
-
     return Array.from(byExercise.values())
         .map((entry) => ({
-            exerciseId: entry.exerciseId,
-            exerciseName: exerciseNameById.get(entry.exerciseId) ?? 'Neznámý cvik',
+            exerciseId: resolveExerciseId(entry.exerciseId),
+            exerciseName: findExerciseById(entry.exerciseId)?.name ?? 'Neznámý cvik',
             entry,
         }))
         .sort((left, right) => {

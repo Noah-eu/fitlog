@@ -1,5 +1,9 @@
 import type { Exercise } from '../types/exercise'
 
+const LEGACY_EXERCISE_ID_ALIASES: Record<string, string> = {
+    'hip-abduction-machine': 'abduction-machine',
+}
+
 const exercises: Exercise[] = [
     {
         id: 'bench-press',
@@ -664,20 +668,6 @@ const exercises: Exercise[] = [
         recommendedSets: '3-4',
     },
     {
-        id: 'hip-abduction-machine',
-        name: 'Roztahování stehen v sedě na stroji',
-        category: 'Nohy',
-        subcategory: 'Addukce / abdukce',
-        primaryMuscles: ['Vnější stehna', 'Hýždě'],
-        secondaryMuscles: ['Stabilizační svaly kyčlí'],
-        shortDescription: 'Strojová abdukce stehen vsedě pro zevní stranu boků a kyčlí.',
-        instructions: 'Sedněte si vzpřímeně a tlačte nohama proti odporu stroje od sebe bez houpání trupem.',
-        commonMistakes: ['Přílišné zapojení trupu', 'Používání příliš velké váhy', 'Švihové opakování'],
-        imageUrl: '/images/exercises/roztahovani.stehen.v.sede.png',
-        recommendedReps: '10-20',
-        recommendedSets: '3-4',
-    },
-    {
         id: 'hip-adduction-machine',
         name: 'Stahování stehen v sedě na stroji',
         category: 'Nohy',
@@ -810,9 +800,9 @@ const exercises: Exercise[] = [
         category: 'Zadek',
         subcategory: 'Abdukce',
         primaryMuscles: ['Hýždě'],
-        secondaryMuscles: [],
-        shortDescription: 'Strojová abdukce pro boční část hýždí a stabilitu kyčlí.',
-        instructions: 'Sedněte si vzpřímeně a tlačte nohy od sebe proti odporu stroje bez houpání trupem.',
+        secondaryMuscles: ['Vnější stehna', 'Stabilizační svaly kyčlí'],
+        shortDescription: 'Sedící abdukční stroj pro boční část hýždí, vnější stehna a stabilitu kyčlí.',
+        instructions: 'Sedněte si vzpřímeně do stroje, opřete stehna nebo kolena o opěrky a tlačte je kontrolovaně od sebe proti odporu bez houpání trupem.',
         commonMistakes: ['Používání švihu', 'Příliš těžká váha', 'Zvedání ramen'],
         imageUrl: '/images/exercises/unozovani.na.stroji.png',
         recommendedReps: '10-20',
@@ -1270,5 +1260,23 @@ const exercises: Exercise[] = [
         recommendedSets: '2-3',
     },
 ]
+
+export function resolveExerciseId(exerciseId: string) {
+    return LEGACY_EXERCISE_ID_ALIASES[exerciseId] ?? exerciseId
+}
+
+export function getEquivalentExerciseIds(exerciseId: string) {
+    const canonicalId = resolveExerciseId(exerciseId)
+    const legacyIds = Object.entries(LEGACY_EXERCISE_ID_ALIASES)
+        .filter(([, targetId]) => targetId === canonicalId)
+        .map(([legacyId]) => legacyId)
+
+    return Array.from(new Set([canonicalId, ...legacyIds]))
+}
+
+export function findExerciseById(exerciseId: string) {
+    const canonicalId = resolveExerciseId(exerciseId)
+    return exercises.find((exercise) => exercise.id === canonicalId)
+}
 
 export default exercises
