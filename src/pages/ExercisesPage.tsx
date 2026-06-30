@@ -4,6 +4,9 @@ import type { Exercise } from '../types/exercise'
 import ExerciseCard from '../components/ExerciseCard'
 import CategoryTabs from '../components/CategoryTabs'
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
+import { getTrainingPreferences, subscribeToTrainingPreferences } from '../services/trainingPreferencesStorage'
+import { resolveExerciseId } from '../data/exercises'
+import type { TrainingPreferences } from '../types/trainingPreferences'
 
 const ALL_SUBCATEGORY = 'Vše'
 
@@ -52,9 +55,15 @@ export default function ExercisesPage() {
         return [ALL_SUBCATEGORY, ...ordered]
     }, [category, categoryExercises])
 
+    const [trainingPreferences, setTrainingPreferences] = React.useState<TrainingPreferences>(getTrainingPreferences())
+
+    useEffect(() => subscribeToTrainingPreferences(setTrainingPreferences), [])
+
+    const excludedSet = React.useMemo(() => new Set((trainingPreferences?.excludedExerciseIds ?? []).map((id) => id)), [trainingPreferences])
+
     const list = useMemo(() => {
-        if (subcategory === ALL_SUBCATEGORY) return categoryExercises
-        return categoryExercises.filter((exercise) => exercise.subcategory === subcategory)
+        const base = subcategory === ALL_SUBCATEGORY ? categoryExercises : categoryExercises.filter((exercise) => exercise.subcategory === subcategory)
+        return base
     }, [categoryExercises, subcategory])
 
     function handleCategoryChange(nextCategory: string) {
@@ -83,7 +92,7 @@ export default function ExercisesPage() {
 
             <section className="exercise-list">
                 {list.map((ex: Exercise) => (
-                    <ExerciseCard key={ex.id} exercise={ex} onOpen={open} />
+                    <ExerciseCard key={ex.id} exercise={ex} onOpen={open} excluded={excludedSet.has(resolveExerciseId(ex.id))} />
                 ))}
             </section>
         </div>

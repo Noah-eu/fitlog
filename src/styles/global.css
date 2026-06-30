@@ -541,6 +541,21 @@ body {
     cursor: pointer
 }
 
+.exercise-card { position: relative }
+
+.excluded-badge {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: rgba(34, 34, 34, 0.9);
+    border: 1px solid rgba(242, 194, 48, 0.9);
+    color: var(--accent-2);
+    font-size: 12px;
+    padding: 6px 8px;
+    border-radius: 999px;
+    z-index: 2;
+}
+
 .exercise-card .thumb {
     width: 64px;
     height: 48px;

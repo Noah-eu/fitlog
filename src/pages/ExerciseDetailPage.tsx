@@ -97,6 +97,9 @@ export default function ExerciseDetailPage() {
         return subscribeToTrainingPreferences(setTrainingPreferences)
     }, [])
 
+    const canonicalId = ex?.id ? resolveExerciseId(ex.id) : null
+    const isExcluded = canonicalId ? (trainingPreferences?.excludedExerciseIds ?? []).includes(canonicalId) : false
+
     const last = useMemo(() => entries[0], [entries])
     const chartPoints = useMemo(() => getDailyMaxWeightPoints(entries), [entries])
 
@@ -188,8 +191,7 @@ export default function ExerciseDetailPage() {
                     <form className="entry-form" onSubmit={handleSave}>
                         <div style={{ marginBottom: 8 }}>
                             {(() => {
-                                const canonicalId = resolveExerciseId(ex.id)
-                                const excluded = (trainingPreferences?.excludedExerciseIds ?? []).includes(canonicalId)
+                                const excluded = isExcluded
                                 return (
                                     <button
                                         type="button"
@@ -211,6 +213,9 @@ export default function ExerciseDetailPage() {
                                 )
                             })()}
                         </div>
+                        {isExcluded ? (
+                            <div className="small muted" style={{ marginBottom: 8 }}>Tento cvik se nebude objevovat v doporučeném plánu.</div>
+                        ) : null}
                         <label>
                             Datum
                             <input type="date" value={date} onChange={(ev) => setDate(ev.target.value)} />
