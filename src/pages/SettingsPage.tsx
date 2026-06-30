@@ -150,6 +150,11 @@ export default function SettingsPage() {
                         </select>
                     </label>
 
+                    <div className="settings-meta">
+                        <span>Full body A/B/C střídá podobné tréninky, aby se cviky neopakovaly pořád stejně.</span>
+                        <span>Rotace A/B/C je aktivní pro doporučený denní plán.</span>
+                    </div>
+
                     <div className="settings-field">
                         <span className="settings-field-label">Zapnuté kategorie</span>
                         <div className="settings-chip-group">

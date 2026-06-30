@@ -2,12 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getWorkoutDateKey, subscribeToEntries } from '../services/workoutStorage'
 import { subscribeToMeasurements } from '../services/bodyMeasurementStorage'
-import { buildTodayRecommendations } from '../services/trainingRecommendations'
+import { buildFullBodyVariantRecommendations, getNextFullBodyVariant } from '../services/trainingRecommendations'
 import { getDefaultTrainingPreferences, subscribeToTrainingPreferences } from '../services/trainingPreferencesStorage'
-import { getTodayDateKey, saveTodayTrainingPlan, subscribeToTodayTrainingPlan } from '../services/trainingDayPlanStorage'
+import { getRecentTrainingPlans, getTodayDateKey, saveTodayTrainingPlan, subscribeToTodayTrainingPlan } from '../services/trainingDayPlanStorage'
 import exercises, { findExerciseById, resolveExerciseId } from '../data/exercises'
 import type { BodyMeasurement } from '../types/body'
-import type { TrainingDayPlan } from '../types/trainingDayPlan'
+import type { TrainingDayPlan, TrainingDayPlanVariant } from '../types/trainingDayPlan'
 import type { WorkoutEntry } from '../types/workout'
 
 function toDateKey(date: Date) {
@@ -105,6 +105,10 @@ function formatRecommendationUsage(lastUsedDateKey: string | null) {
     return `Naposledy cvičeno: ${formatDateKey(lastUsedDateKey)}`
 }
 
+function formatVariantLabel(variant: TrainingDayPlanVariant | undefined) {
+    return `Full body ${variant ?? 'A'}`
+}
+
 export default function TodayPage() {
     const navigate = useNavigate()
     const [entries, setEntries] = useState<WorkoutEntry[]>([])
@@ -173,49 +177,75 @@ export default function TodayPage() {
     }, [todayPlan, entries, completedExerciseIds])
     const completedCount = storedExercises.filter((item) => item.completed).length
 
-    useEffect(() => {
-        if (todayPlan || planSaving) return
+    async function generateAndSavePlan(source: 'auto' | 'manual') {
+        const recentPlans = await getRecentTrainingPlans(3)
+        const pastPlans = recentPlans.filter((plan) => plan.dateKey !== todayDateKey)
+        const recentReferencePlans = todayPlan ? [todayPlan, ...pastPlans] : pastPlans
+        const variant = source === 'manual'
+            ? getNextFullBodyVariant(todayPlan?.variant ?? recentPlans[0]?.variant ?? null)
+            : getNextFullBodyVariant(pastPlans[0]?.variant ?? null)
 
-        const generatedExerciseIds = buildTodayRecommendations(exercises, entries, trainingPreferences)
-            .map((recommendation) => recommendation.exercise.id)
+        const generatedExerciseIds = buildFullBodyVariantRecommendations(
+            exercises,
+            entries,
+            trainingPreferences,
+            variant,
+            recentReferencePlans,
+        ).map((recommendation) => recommendation.exercise.id)
 
-        if (generatedExerciseIds.length === 0) return
+        if (generatedExerciseIds.length === 0) {
+            return null
+        }
 
-        setPlanSaving(true)
-        setPlanError(null)
-
-        saveTodayTrainingPlan(generatedExerciseIds, {
-            source: 'auto',
+        return saveTodayTrainingPlan(generatedExerciseIds, {
+            source,
+            variant,
             preferencesSnapshot: {
                 enabledCategories: [...trainingPreferences.enabledCategories],
                 targetExerciseCount: trainingPreferences.targetExerciseCount,
                 avoidRecentlyUsedDays: trainingPreferences.avoidRecentlyUsedDays,
             },
         })
+    }
+
+    useEffect(() => {
+        if (todayPlan || planSaving) return
+
+        let cancelled = false
+        setPlanSaving(true)
+        setPlanError(null)
+
+        generateAndSavePlan('auto')
+            .then((plan) => {
+                if (!plan && !cancelled) {
+                    setPlanError('Nepodařilo se vygenerovat dnešní plán.')
+                }
+            })
             .catch((error) => {
-                setPlanError(error instanceof Error ? error.message : 'Nepodařilo se vygenerovat dnešní plán.')
+                if (!cancelled) {
+                    setPlanError(error instanceof Error ? error.message : 'Nepodařilo se vygenerovat dnešní plán.')
+                }
             })
             .finally(() => {
-                setPlanSaving(false)
+                if (!cancelled) {
+                    setPlanSaving(false)
+                }
             })
+
+        return () => {
+            cancelled = true
+        }
     }, [todayPlan, planSaving, entries, trainingPreferences])
 
     async function handleRegeneratePlan() {
-        const generatedExerciseIds = buildTodayRecommendations(exercises, entries, trainingPreferences)
-            .map((recommendation) => recommendation.exercise.id)
-
         setPlanSaving(true)
         setPlanError(null)
 
         try {
-            await saveTodayTrainingPlan(generatedExerciseIds, {
-                source: 'manual',
-                preferencesSnapshot: {
-                    enabledCategories: [...trainingPreferences.enabledCategories],
-                    targetExerciseCount: trainingPreferences.targetExerciseCount,
-                    avoidRecentlyUsedDays: trainingPreferences.avoidRecentlyUsedDays,
-                },
-            })
+            const plan = await generateAndSavePlan('manual')
+            if (!plan) {
+                throw new Error('Nepodařilo se vygenerovat nový plán.')
+            }
         } catch (error) {
             setPlanError(error instanceof Error ? error.message : 'Nepodařilo se vygenerovat nový plán.')
         } finally {
@@ -266,7 +296,7 @@ export default function TodayPage() {
                     <div className="section-heading">
                         <div>
                             <h3>Dnes doporučeno</h3>
-                            <span>Stabilní plán pro dnešek</span>
+                            <span>{todayPlan ? `${formatVariantLabel(todayPlan.variant)} • stabilní plán pro dnešek` : 'Stabilní plán pro dnešek'}</span>
                         </div>
                         <div className="dashboard-actions">
                             <button type="button" onClick={() => navigate('/settings')}>Upravit plán</button>
@@ -284,7 +314,7 @@ export default function TodayPage() {
                     ) : (
                         <>
                             <div className="dashboard-plan-summary">
-                                <strong>Hotovo {completedCount} / {storedExercises.length}</strong>
+                                <strong>{formatVariantLabel(todayPlan?.variant)} • Hotovo {completedCount} / {storedExercises.length}</strong>
                                 <span>{completedCount === storedExercises.length ? 'Dnešní plán hotový' : 'Splněné cviky zůstávají na stejném místě.'}</span>
                             </div>
                             <div className="recommendation-list">

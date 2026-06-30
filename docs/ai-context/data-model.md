@@ -77,6 +77,7 @@ Training preferences storage
 Training day plan shape:
 - dateKey: string
 - exerciseIds: string[]
+- variant: 'A' | 'B' | 'C'
 - generatedAt: string (ISO timestamp)
 - source: 'auto' | 'manual'
 - preferencesSnapshot?:

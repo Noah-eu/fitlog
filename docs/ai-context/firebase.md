@@ -37,3 +37,4 @@ Local auth foundation
 - Body measurements sync through `src/services/bodyMeasurementStorage.ts`, which uses Firestore for logged-in users and falls back to localStorage only when Firebase Auth/Firestore is unavailable.
 - Training preferences sync through `src/services/trainingPreferencesStorage.ts`, which uses Firestore for logged-in users and falls back to localStorage only when Firebase Auth/Firestore is unavailable.
 - Daily training plans sync through `src/services/trainingDayPlanStorage.ts`, which uses Firestore for logged-in users and falls back to localStorage only when Firebase Auth/Firestore is unavailable.
+- The stored daily training plan document may include a simple `variant` field (`A`, `B`, or `C`) for the full body rotation; this stays within the same `trainingPlans` document path.

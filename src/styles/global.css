@@ -541,7 +541,9 @@ body {
     cursor: pointer
 }
 
-.exercise-card { position: relative }
+.exercise-card {
+    position: relative
+}
 
 .excluded-badge {
     position: absolute;

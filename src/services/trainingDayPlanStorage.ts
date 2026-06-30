@@ -1,7 +1,7 @@
 import { onAuthStateChanged } from 'firebase/auth'
-import { doc, onSnapshot, setDoc } from 'firebase/firestore'
+import { collection, doc, getDocs, limit, onSnapshot, orderBy, query, setDoc } from 'firebase/firestore'
 import { auth, db } from '../firebase/config'
-import type { TrainingDayPlan, TrainingDayPlanSource } from '../types/trainingDayPlan'
+import type { TrainingDayPlan, TrainingDayPlanSource, TrainingDayPlanVariant } from '../types/trainingDayPlan'
 
 const KEY = 'fitlog.trainingDayPlans.v1'
 
@@ -48,7 +48,7 @@ function readAllLocalTrainingDayPlans() {
 }
 
 function readLocalTrainingDayPlan(dateKey: string) {
-    return readAllLocalTrainingDayPlans()[dateKey] ?? null
+    return normalizeTrainingDayPlan(readAllLocalTrainingDayPlans()[dateKey] ?? null)
 }
 
 function writeLocalTrainingDayPlan(plan: TrainingDayPlan) {
@@ -79,6 +79,7 @@ function normalizeTrainingDayPlan(value: Partial<TrainingDayPlan> | null | undef
     return {
         dateKey,
         exerciseIds,
+        variant: value.variant === 'B' || value.variant === 'C' ? value.variant : 'A',
         generatedAt: typeof value.generatedAt === 'string' && value.generatedAt.trim().length > 0 ? value.generatedAt : new Date().toISOString(),
         source: value.source === 'manual' ? 'manual' : 'auto',
         preferencesSnapshot: value.preferencesSnapshot && typeof value.preferencesSnapshot === 'object'
@@ -214,13 +215,17 @@ export function subscribeToTodayTrainingPlan(listener: TrainingDayPlanListener) 
     }
 }
 
-export async function saveTodayTrainingPlan(exerciseIds: string[], options?: { source?: TrainingDayPlanSource; preferencesSnapshot?: TrainingDayPlan['preferencesSnapshot'] }) {
+export async function saveTodayTrainingPlan(
+    exerciseIds: string[],
+    options?: { source?: TrainingDayPlanSource; variant?: TrainingDayPlanVariant; preferencesSnapshot?: TrainingDayPlan['preferencesSnapshot'] },
+) {
     initializeStore()
 
     const dateKey = getTodayDateKey()
     const nextPlan = normalizeTrainingDayPlan({
         dateKey,
         exerciseIds,
+        variant: options?.variant,
         generatedAt: new Date().toISOString(),
         source: options?.source ?? 'auto',
         preferencesSnapshot: options?.preferencesSnapshot,
@@ -244,4 +249,27 @@ export async function saveTodayTrainingPlan(exerciseIds: string[], options?: { s
 
     emitTrainingDayPlan(nextPlan, { persistLocal: true })
     return nextPlan
+}
+
+export async function getRecentTrainingPlans(maxCount = 3): Promise<TrainingDayPlan[]> {
+    initializeStore()
+
+    if (canUseFirestoreTrainingPlans()) {
+        const userId = getActiveUserId() as string
+        const plansCollection = collection(db!, 'users', userId, 'trainingPlans')
+        const snapshot = await getDocs(query(plansCollection, orderBy('generatedAt', 'desc'), limit(maxCount)))
+
+        return snapshot.docs
+            .map((item) => normalizeTrainingDayPlan(item.data() as Partial<TrainingDayPlan>))
+            .filter((item): item is TrainingDayPlan => item !== null)
+    }
+
+    return Object.values(readAllLocalTrainingDayPlans())
+        .map((plan) => normalizeTrainingDayPlan(plan))
+        .filter((plan): plan is TrainingDayPlan => plan !== null)
+        .sort((left, right) => {
+            if (left.generatedAt !== right.generatedAt) return right.generatedAt.localeCompare(left.generatedAt)
+            return right.dateKey.localeCompare(left.dateKey)
+        })
+        .slice(0, maxCount)
 }
