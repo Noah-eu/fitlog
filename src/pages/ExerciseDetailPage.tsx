@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { findExerciseById, getEquivalentExerciseIds, resolveExerciseId } from '../data/exercises'
 import { getTrainingPreferences, subscribeToTrainingPreferences, saveTrainingPreferences } from '../services/trainingPreferencesStorage'
 import type { WorkoutEntry } from '../types/workout'
@@ -58,10 +58,12 @@ export default function ExerciseDetailPage() {
         return typeof state?.idx === 'number' && state.idx > 0
     }
 
+    const location = useLocation()
+
     if (!ex) {
         return (
             <div className="page">
-                <BackButton fallbackTo="/exercises" />
+                <BackButton fallbackTo={`/exercises${location.search}`} />
                 <h1>Nenalezeno</h1>
                 <p>Cvičení nebylo nalezeno.</p>
             </div>
@@ -166,7 +168,7 @@ export default function ExerciseDetailPage() {
 
     return (
         <div className="page">
-            <BackButton fallbackTo="/exercises" />
+            <BackButton fallbackTo={`/exercises${location.search}`} />
             <h1>{ex.name}</h1>
             <div className="exercise-detail">
                 <div className="thumb large">

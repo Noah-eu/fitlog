@@ -300,7 +300,7 @@ export default function TodayPage() {
                                             </span>
                                             <h4>{item.exercise.name}</h4>
                                             <p>{formatRecommendationUsage(item.lastUsedDateKey)}</p>
-                                                {item.excluded ? <div className="small muted">Vyřazeno z budoucích plánů</div> : null}
+                                            {item.excluded ? <div className="small muted">Vyřazeno z budoucích plánů</div> : null}
                                             <div className={`recommendation-status${item.completed ? ' done' : ''}`}>
                                                 {item.completed ? 'Dnes zapsáno' : 'Čeká na splnění'}
                                             </div>

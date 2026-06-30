@@ -1,9 +1,9 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import exercises from '../data/exercises'
 import type { Exercise } from '../types/exercise'
 import ExerciseCard from '../components/ExerciseCard'
 import CategoryTabs from '../components/CategoryTabs'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 
 const ALL_SUBCATEGORY = 'Vše'
 
@@ -26,8 +26,15 @@ export default function ExercisesPage() {
         exercises.forEach((e) => set.add(e.category))
         return Array.from(set)
     }, [])
-    const [category, setCategory] = useState<string>(categories[0] ?? 'All')
-    const [subcategory, setSubcategory] = useState<string>(ALL_SUBCATEGORY)
+    const [searchParams, setSearchParams] = useSearchParams()
+    const location = useLocation()
+
+    const defaultCategory = categories[0] ?? 'All'
+    const paramCategory = searchParams.get('category')
+    const paramSubcategory = searchParams.get('subcategory')
+
+    const [category, setCategory] = useState<string>(paramCategory && categories.includes(paramCategory) ? paramCategory : defaultCategory)
+    const [subcategory, setSubcategory] = useState<string>(paramSubcategory ?? ALL_SUBCATEGORY)
 
     const categoryExercises = useMemo(
         () => exercises.filter((exercise) => exercise.category === category),
@@ -56,8 +63,17 @@ export default function ExercisesPage() {
     }
 
     function open(id: string) {
-        navigate(`/exercises/${id}`)
+        // preserve current search params so back navigation restores filters
+        navigate(`/exercises/${id}${location.search}`)
     }
+
+    // sync state -> url (push history so back restores previous filter state)
+    useEffect(() => {
+        const params: Record<string, string> = {}
+        if (category) params.category = category
+        if (subcategory && subcategory !== ALL_SUBCATEGORY) params.subcategory = subcategory
+        setSearchParams(params)
+    }, [category, subcategory, setSearchParams])
 
     return (
         <div className="page">
