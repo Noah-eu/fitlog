@@ -6,6 +6,7 @@ Primary screens and key components
  - Today / Dashboard
   - Header with `FitLog / Dnes` and short training/progress subtitle
   - Activity summary cards for unique training days in the last 7 and 30 days, last training day, and workout entry count in the last 7 days
+  - `Dnes doporučeno` section derived from user training preferences, with links into exercise detail
   - `Moje rekordy` section showing computed top 5 highest recorded weights by exercise with reps, sets, and date
   - Compact latest body summary (body weight, waist, chest, date) when measurements exist
   - Real quick actions only: `Začít cvičit`, `Otevřít deník`, `Moje tělo`
@@ -37,6 +38,7 @@ Primary screens and key components
   - Trend charts
 
 - Settings
+  - `Tréninkový plán` section for full-body recommendation preferences
   - Account and sync options
 
 Design notes
@@ -59,3 +61,4 @@ Navigation
 My body details
 - `src/pages/MyBodyPage.tsx` supports adding, editing, and deleting body measurements. Logged-in users sync through Firestore; localStorage remains only as fallback/import source. Latest measurement summary is shown at the top, a metric-switchable progress chart appears in the `Vývoj` section, and history remains below (newest first).
 - `src/pages/ExerciseDetailPage.tsx` includes a `Vývoj výkonu` chart for the selected exercise based on saved workout weight entries over time.
+- `src/pages/TodayPage.tsx` also shows deterministic recommendations based on enabled categories, target exercise count, and recently used history.

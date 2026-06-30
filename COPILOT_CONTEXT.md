@@ -27,8 +27,11 @@ Local source map (read these next when editing UI or routing)
 - src/styles/global.css
  - src/types/workout.ts
  - src/services/workoutStorage.ts
+ - src/services/trainingPreferencesStorage.ts
+ - src/services/trainingRecommendations.ts
  - src/pages/ExerciseDetailPage.tsx
  - src/types/body.ts
+ - src/types/trainingPreferences.ts
  - src/services/bodyMeasurementStorage.ts
  - src/pages/MyBodyPage.tsx
 
@@ -41,6 +44,7 @@ Quick rules for UI/Scaffold edits
 - When changing the UI shell or routing, update this file and `docs/ai-context/*` to keep the source map accurate.
 - Keep feature scope limited to the MVP in APP_PLAN.md; do not add Firebase, charts, auth, or AI in UI-only edits.
 - `src/services/workoutStorage.ts` includes local day helpers used by the dashboard and workout calendar; prefer those helpers over ad-hoc date slicing when working with workout dates.
+- Training preferences are stored separately from workout/body entries and should follow the same Firestore-or-local fallback pattern when extended.
 
 Key rules to enforce in code and design
 - Personal data must always be stored and queried with an explicit `userId` key.

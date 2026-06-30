@@ -61,6 +61,19 @@ Body measurement storage
 - Ownership: only the authenticated user may read or write measurements under their own `userId` path.
 - Local fallback: body measurements may remain in browser localStorage only when Firebase Auth/Firestore is unavailable, or until the user manually imports local data into cloud storage.
 
+Training preferences shape:
+- style: 'fullBody'
+- enabledCategories: string[]
+- enabledSubcategoriesByCategory?: Record<string, string[]>
+- targetExerciseCount: number
+- avoidRecentlyUsedDays: number
+- updatedAt: string (ISO timestamp)
+
+Training preferences storage
+- Firestore path: `users/{userId}/settings/trainingPreferences`
+- Ownership: only the authenticated user may read or write preferences under their own `userId` path.
+- Local fallback: training preferences may remain in browser localStorage only when Firebase Auth/Firestore is unavailable.
+
 - `users/{userId}/workoutEntries/{entryId}`
   - id: string
   - exerciseId: string
@@ -90,3 +103,4 @@ Notes
 - Exercise templates may include an optional `subcategory` string for second-level filtering within each main exercise category.
 - Workout entries stay separate from exercise templates and are always scoped by `userId`.
 - Body measurements are personal records and are always scoped by `userId`.
+- Training preferences stay separate from workout/body records and are stored as a single user-scoped settings document.

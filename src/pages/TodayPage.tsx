@@ -2,6 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getWorkoutDateKey, subscribeToEntries } from '../services/workoutStorage'
 import { subscribeToMeasurements } from '../services/bodyMeasurementStorage'
+import { buildTodayRecommendations } from '../services/trainingRecommendations'
+import type { TrainingRecommendation } from '../services/trainingRecommendations'
+import { getDefaultTrainingPreferences, subscribeToTrainingPreferences } from '../services/trainingPreferencesStorage'
 import exercises from '../data/exercises'
 import type { BodyMeasurement } from '../types/body'
 import type { WorkoutEntry } from '../types/workout'
@@ -100,10 +103,17 @@ function formatLastWorkoutSummary(lastWorkoutDay: string | null) {
     return `Poslední trénink: ${formatDateKey(lastWorkoutDay)}`
 }
 
+function formatRecommendationUsage(recommendation: TrainingRecommendation) {
+    if (!recommendation.lastUsedDateKey) return 'Ještě nemáš zapsaný žádný výkon.'
+    if (recommendation.isRecentlyUsed) return `Cvičeno nedávno: ${formatDateKey(recommendation.lastUsedDateKey)}`
+    return `Naposledy cvičeno: ${formatDateKey(recommendation.lastUsedDateKey)}`
+}
+
 export default function TodayPage() {
     const navigate = useNavigate()
     const [entries, setEntries] = useState<WorkoutEntry[]>([])
     const [measurements, setMeasurements] = useState<BodyMeasurement[]>([])
+    const [trainingPreferences, setTrainingPreferences] = useState(getDefaultTrainingPreferences())
 
     useEffect(() => {
         return subscribeToEntries(setEntries)
@@ -113,9 +123,17 @@ export default function TodayPage() {
         return subscribeToMeasurements(setMeasurements)
     }, [])
 
+    useEffect(() => {
+        return subscribeToTrainingPreferences(setTrainingPreferences)
+    }, [])
+
     const latestMeasurement = measurements[0]
     const activitySummary = useMemo(() => buildActivitySummary(entries), [entries])
     const personalRecords = useMemo(() => buildPersonalRecords(entries), [entries])
+    const todayRecommendations = useMemo(
+        () => buildTodayRecommendations(exercises, entries, trainingPreferences),
+        [entries, trainingPreferences],
+    )
 
     return (
         <div className="page">
@@ -153,6 +171,44 @@ export default function TodayPage() {
                             <strong>{activitySummary.entriesLast7}</strong>
                         </article>
                     </div>
+                </section>
+
+                <section className="dashboard-section">
+                    <div className="section-heading">
+                        <div>
+                            <h3>Dnes doporučeno</h3>
+                            <span>Podle tvého full body nastavení</span>
+                        </div>
+                        <button type="button" onClick={() => navigate('/settings')}>Upravit plán</button>
+                    </div>
+
+                    {todayRecommendations.length === 0 ? (
+                        <div className="card empty-state-card recommendation-empty-state">
+                            <p>Nastav si tréninkový plán v Nastavení.</p>
+                            <button type="button" onClick={() => navigate('/settings')} style={{ marginTop: 10 }}>Otevřít nastavení</button>
+                        </div>
+                    ) : (
+                        <div className="recommendation-list">
+                            {todayRecommendations.map((recommendation) => (
+                                <article key={recommendation.exercise.id} className="card recommendation-card">
+                                    <div className="recommendation-thumb">
+                                        {recommendation.exercise.imageUrl ? <img src={recommendation.exercise.imageUrl} alt={recommendation.exercise.name} /> : null}
+                                    </div>
+                                    <div className="recommendation-meta">
+                                        <span className="recommendation-category">
+                                            {recommendation.exercise.category}
+                                            {recommendation.exercise.subcategory ? ` • ${recommendation.exercise.subcategory}` : ''}
+                                        </span>
+                                        <h4>{recommendation.exercise.name}</h4>
+                                        <p>{formatRecommendationUsage(recommendation)}</p>
+                                    </div>
+                                    <button type="button" onClick={() => navigate(`/exercises/${recommendation.exercise.id}`)}>
+                                        Otevřít
+                                    </button>
+                                </article>
+                            ))}
+                        </div>
+                    )}
                 </section>
 
                 <section className="dashboard-section">
