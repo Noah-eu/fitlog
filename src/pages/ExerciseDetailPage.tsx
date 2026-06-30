@@ -20,6 +20,19 @@ function formatChartDate(date: string) {
     return `${day}. ${month}.`
 }
 
+function formatEntryDate(date: string) {
+    return new Date(date).toLocaleDateString('cs-CZ')
+}
+
+function formatPerformanceMetric(value: number | undefined, suffix?: string) {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return '-'
+    return suffix ? `${value} ${suffix}` : `${value}`
+}
+
+function formatPreviousPerformanceHint(entry: WorkoutEntry) {
+    return `${formatPerformanceMetric(entry.weight, 'kg')} × ${formatPerformanceMetric(entry.reps)} × ${formatPerformanceMetric(entry.sets)}`
+}
+
 function getDailyMaxWeightPoints(entries: WorkoutEntry[]) {
     const dailyMaxByDate = new Map<string, { value: number; orderKey: string }>()
 
@@ -75,7 +88,23 @@ export default function ExerciseDetailPage() {
     const [note, setNote] = useState<string>('')
     const [editingId, setEditingId] = useState<string | null>(null)
     const [saveError, setSaveError] = useState<string | null>(null)
+    const [autoFilledEntryId, setAutoFilledEntryId] = useState<string | null>(null)
 
+    function applyPerformanceValues(source?: Pick<WorkoutEntry, 'weight' | 'reps' | 'sets'>) {
+        setWeight(source?.weight ?? '')
+        setReps(source?.reps ?? '')
+        setSetsVal(source?.sets ?? '')
+    }
+
+    function resetEntryForm() {
+        setDate(todayISODate())
+        applyPerformanceValues()
+        setDifficulty('akorát')
+        setNote('')
+        setEditingId(null)
+        setSaveError(null)
+        setAutoFilledEntryId(null)
+    }
 
     useEffect(() => {
         if (!ex.id) return
@@ -85,8 +114,27 @@ export default function ExerciseDetailPage() {
         })
     }, [ex.id])
 
+    useEffect(() => {
+        resetEntryForm()
+    }, [ex.id])
+
     const last = useMemo(() => entries[0], [entries])
     const chartPoints = useMemo(() => getDailyMaxWeightPoints(entries), [entries])
+
+    useEffect(() => {
+        if (!last || editingId) return
+        if (autoFilledEntryId === last.id) return
+        if (weight !== '' || reps !== '' || setsVal !== '') return
+
+        applyPerformanceValues(last)
+        setAutoFilledEntryId(last.id)
+    }, [autoFilledEntryId, editingId, last, reps, setsVal, weight])
+
+    function handleUseLastPerformance() {
+        if (!last) return
+        applyPerformanceValues(last)
+        setAutoFilledEntryId(last.id)
+    }
 
     async function handleSave(e: React.FormEvent) {
         e.preventDefault()
@@ -118,10 +166,7 @@ export default function ExerciseDetailPage() {
                 })
             }
 
-            setWeight('')
-            setReps('')
-            setSetsVal('')
-            setNote('')
+            resetEntryForm()
             if (!wasEditing) {
                 if (hasRouterHistory()) {
                     navigate(-1)
@@ -136,13 +181,17 @@ export default function ExerciseDetailPage() {
 
     function startEdit(item: WorkoutEntry) {
         setEditingId(item.id)
+        setSaveError(null)
         setDate(getWorkoutDateKey(item.date))
-        setWeight(item.weight ?? '')
-        setReps(item.reps ?? '')
-        setSetsVal(item.sets ?? '')
+        applyPerformanceValues(item)
         setDifficulty(item.difficulty ?? 'akorát')
         setNote(item.note ?? '')
+        setAutoFilledEntryId(item.id)
         window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
+    function cancelEdit() {
+        resetEntryForm()
     }
 
     async function handleDelete(id: string) {
@@ -164,6 +213,93 @@ export default function ExerciseDetailPage() {
                 </div>
                 <div className="meta">
                     <div className="cat">{ex.subcategory ? `${ex.category} • ${ex.subcategory}` : ex.category}</div>
+                    {ex.shortDescription ? <p>{ex.shortDescription}</p> : null}
+
+                    <section className="quick-entry-panel">
+                        <div className="quick-entry-head">
+                            <div>
+                                <h3>Rychlý zápis</h3>
+                                {last ? (
+                                    <p className="quick-entry-summary">Minule: {formatPreviousPerformanceHint(last)}</p>
+                                ) : (
+                                    <p className="quick-entry-summary">Zatím nemáš předchozí výkon pro tento cvik.</p>
+                                )}
+                            </div>
+                            {editingId ? <span className="quick-entry-badge">Upravuješ záznam</span> : null}
+                        </div>
+
+                        {last ? (
+                            <div className="performance-grid quick-entry-grid">
+                                <div>
+                                    <span>Váha</span>
+                                    <strong>{formatPerformanceMetric(last.weight, 'kg')}</strong>
+                                </div>
+                                <div>
+                                    <span>Opakování</span>
+                                    <strong>{formatPerformanceMetric(last.reps)}</strong>
+                                </div>
+                                <div>
+                                    <span>Série</span>
+                                    <strong>{formatPerformanceMetric(last.sets)}</strong>
+                                </div>
+                                <div>
+                                    <span>Datum</span>
+                                    <strong>{formatEntryDate(last.date)}</strong>
+                                </div>
+                                <div className="quick-entry-grid-full">
+                                    <span>Obtížnost</span>
+                                    <strong>{last.difficulty ?? '-'}</strong>
+                                </div>
+                            </div>
+                        ) : null}
+
+                        <form className="entry-form" onSubmit={handleSave}>
+                            <div className="entry-form-grid">
+                                <label>
+                                    Datum
+                                    <input type="date" value={date} onChange={(ev) => setDate(ev.target.value)} />
+                                </label>
+                                <label>
+                                    Obtížnost
+                                    <select value={difficulty} onChange={(ev) => setDifficulty(ev.target.value as 'lehké' | 'akorát' | 'těžké')}>
+                                        <option value="lehké">lehké</option>
+                                        <option value="akorát">akorát</option>
+                                        <option value="těžké">těžké</option>
+                                    </select>
+                                </label>
+                                <label>
+                                    Váha (kg)
+                                    <input type="number" inputMode="decimal" min="0" step="0.5" value={weight as number | ''} onChange={(ev) => setWeight(ev.target.value === '' ? '' : Number(ev.target.value))} />
+                                </label>
+                                <label>
+                                    Opakování
+                                    <input type="number" inputMode="numeric" min="0" step="1" value={reps as number | ''} onChange={(ev) => setReps(ev.target.value === '' ? '' : Number(ev.target.value))} />
+                                </label>
+                                <label>
+                                    Série
+                                    <input type="number" inputMode="numeric" min="0" step="1" value={setsVal as number | ''} onChange={(ev) => setSetsVal(ev.target.value === '' ? '' : Number(ev.target.value))} />
+                                </label>
+                                <label className="entry-field-full">
+                                    Poznámka (volitelné)
+                                    <textarea value={note} onChange={(ev) => setNote(ev.target.value)} />
+                                </label>
+                            </div>
+
+                            <div className="entry-form-actions">
+                                <button type="submit" className="primary">Uložit výkon</button>
+                                {last ? (
+                                    <button type="button" onClick={handleUseLastPerformance}>Použít minule</button>
+                                ) : null}
+                                {editingId ? (
+                                    <button type="button" onClick={cancelEdit}>Zrušit úpravu</button>
+                                ) : null}
+                            </div>
+
+                            {saveError ? <div className="form-error">{saveError}</div> : null}
+                        </form>
+                    </section>
+
+                    <div className="exercise-detail-copy">
                     <p><strong>Primární svaly:</strong> {ex.primaryMuscles.join(', ')}</p>
                     {ex.secondaryMuscles && ex.secondaryMuscles.length > 0 && (
                         <p><strong>Sekundární svaly:</strong> {ex.secondaryMuscles.join(', ')}</p>
@@ -172,46 +308,7 @@ export default function ExerciseDetailPage() {
                     <p><strong>Časté chyby:</strong> {ex.commonMistakes.join('; ')}</p>
                     <p><strong>Doporučené opakování:</strong> {ex.recommendedReps}</p>
                     <p><strong>Doporučené série:</strong> {ex.recommendedSets}</p>
-
-                    <form className="entry-form" onSubmit={handleSave}>
-                        <label>
-                            Datum
-                            <input type="date" value={date} onChange={(ev) => setDate(ev.target.value)} />
-                        </label>
-                        <label>
-                            Váha (kg)
-                            <input type="number" value={weight as any} onChange={(ev) => setWeight(ev.target.value === '' ? '' : Number(ev.target.value))} />
-                        </label>
-                        <label>
-                            Opakování
-                            <input type="number" value={reps as any} onChange={(ev) => setReps(ev.target.value === '' ? '' : Number(ev.target.value))} />
-                        </label>
-                        <label>
-                            Série
-                            <input type="number" value={setsVal as any} onChange={(ev) => setSetsVal(ev.target.value === '' ? '' : Number(ev.target.value))} />
-                        </label>
-                        <label>
-                            Obtížnost
-                            <select value={difficulty} onChange={(ev) => setDifficulty(ev.target.value as any)}>
-                                <option value="lehké">lehké</option>
-                                <option value="akorát">akorát</option>
-                                <option value="těžké">těžké</option>
-                            </select>
-                        </label>
-                        <label>
-                            Poznámka
-                            <textarea value={note} onChange={(ev) => setNote(ev.target.value)} />
-                        </label>
-                        <button type="submit" className="primary">Zapsat výkon</button>
-                        {saveError ? <div className="form-error">{saveError}</div> : null}
-                    </form>
-
-                    {last && (
-                        <div className="last-performance">
-                            <h3>Poslední výkon</h3>
-                            <p>{new Date(last.date).toLocaleDateString('cs-CZ')} — {last.sets ?? '-'}×{last.reps ?? '-'} @ {last.weight ?? '-'} kg ({last.difficulty ?? '-'})</p>
-                        </div>
-                    )}
+                    </div>
 
                     <section className="chart-section card">
                         <div className="section-heading">

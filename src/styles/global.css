@@ -361,6 +361,13 @@ body {
     box-shadow: var(--shadow)
 }
 
+.exercise-detail-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+}
+
 .exercise-detail .primary {
     background: var(--accent);
     color: white;
@@ -375,6 +382,68 @@ body {
     flex-direction: column;
     gap: 10px;
     margin-top: 12px
+}
+
+.quick-entry-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 14px;
+    padding: 14px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(242, 194, 48, 0.18);
+    border-radius: 14px;
+}
+
+.quick-entry-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.quick-entry-head h3 {
+    margin: 0;
+}
+
+.quick-entry-summary {
+    margin-top: 4px;
+    font-size: 14px;
+}
+
+.quick-entry-badge {
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(225, 29, 47, 0.14);
+    border: 1px solid rgba(225, 29, 47, 0.24);
+    color: #fecdd3;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.quick-entry-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.quick-entry-grid .quick-entry-grid-full {
+    grid-column: 1 / -1;
+}
+
+.entry-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.entry-form label.entry-field-full {
+    grid-column: 1 / -1;
+}
+
+.entry-form input,
+.entry-form textarea,
+.entry-form select {
+    min-height: 46px;
 }
 
 .entry-actions {
@@ -424,6 +493,16 @@ body {
 
 .entry-form textarea {
     min-height: 64px
+}
+
+.entry-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.entry-form-actions > * {
+    flex: 1 1 180px;
 }
 
 .last-performance {
@@ -843,7 +922,8 @@ button:not(.primary):not(.back-button) {
 
     .dashboard-hero,
     .section-heading,
-    .performance-head {
+    .performance-head,
+    .quick-entry-head {
         flex-direction: column;
     }
 
@@ -864,6 +944,15 @@ button:not(.primary):not(.back-button) {
 
     .chart-summary {
         grid-template-columns: 1fr;
+    }
+
+    .entry-form-grid,
+    .quick-entry-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .entry-form-actions {
+        flex-direction: column;
     }
 }
 

@@ -19,8 +19,9 @@ Primary screens and key components
 
 - Exercise detail
   - Template info (description, muscle group)
-  - Last used weight (pulled from `users/{userId}/exerciseStats`)
-  - Quick-add to workout
+  - Quick workout entry form near the top of the page for date, weight, reps, sets, difficulty, and optional note
+  - Latest performance summary near the form (weight, reps, sets, date, difficulty)
+  - Latest weight/reps/sets prefill for faster gym logging plus a `Použít minule` action
   - Selected exercise progress chart for bodyweight used over time
   - Visible in-app `Zpět` button with safe fallback to `/exercises` when the detail route is opened directly
 
