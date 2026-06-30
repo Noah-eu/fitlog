@@ -159,6 +159,7 @@ export default function SettingsPage() {
                                     <button
                                         key={category}
                                         type="button"
+                                        aria-pressed={active}
                                         className={`settings-chip${active ? ' active' : ''}`}
                                         onClick={() => handleToggleCategory(category)}
                                     >
