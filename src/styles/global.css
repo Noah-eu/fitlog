@@ -292,17 +292,17 @@ body {
 
 .settings-chip.active {
     color: #fff8d7;
-    font-weight: 800;
-    background: linear-gradient(90deg, rgba(129, 12, 21, 0.96), rgba(225, 29, 47, 0.9));
-    border-color: rgba(242, 194, 48, 0.82);
-    box-shadow: 0 14px 30px rgba(225, 29, 47, 0.34), 0 0 0 1px rgba(242, 194, 48, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.28);
+    font-weight: 900;
+    background: linear-gradient(90deg, rgba(170, 12, 21, 0.98), rgba(225, 29, 47, 0.98));
+    border: 2px solid rgba(242, 194, 48, 0.98);
+    box-shadow: 0 20px 44px rgba(225, 29, 47, 0.48), 0 0 0 6px rgba(242, 194, 48, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.36);
 }
 
 .settings-chip.active:hover {
     transform: translateY(-1px);
-    border-color: rgba(242, 194, 48, 0.92);
-    box-shadow: 0 16px 32px rgba(225, 29, 47, 0.4), 0 0 0 1px rgba(242, 194, 48, 0.24);
+    border-color: rgba(242, 194, 48, 0.98);
+    box-shadow: 0 22px 48px rgba(225, 29, 47, 0.52), 0 0 0 8px rgba(242, 194, 48, 0.12), inset 0 1px 0 rgba(255,255,255,0.06);
 }
 
 .settings-meta {
@@ -864,8 +864,8 @@ button:not(.primary):not(.back-button) {
     font-weight: 900;
     background: linear-gradient(90deg, rgba(180, 12, 21, 0.98), rgba(225, 29, 47, 0.96));
     border-color: rgba(242, 194, 48, 0.98);
-    box-shadow: 0 18px 38px rgba(225, 29, 47, 0.44), 0 0 0 6px rgba(242, 194, 48, 0.08), inset 0 1px 0 rgba(255,255,255,0.08);
-    text-shadow: 0 1px 0 rgba(0,0,0,0.36);
+    box-shadow: 0 18px 38px rgba(225, 29, 47, 0.44), 0 0 0 6px rgba(242, 194, 48, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.36);
 }
 
 .category-tabs .tab:not(.active):hover {
@@ -889,8 +889,8 @@ button:not(.primary):not(.back-button) {
     font-weight: 900;
     background: linear-gradient(90deg, rgba(170, 12, 21, 0.96), rgba(225, 29, 47, 0.92));
     border-color: rgba(242, 194, 48, 0.96);
-    box-shadow: 0 14px 30px rgba(225, 29, 47, 0.36), 0 0 0 5px rgba(242, 194, 48, 0.06), inset 0 1px 0 rgba(255,255,255,0.06);
-    text-shadow: 0 1px 0 rgba(0,0,0,0.28);
+    box-shadow: 0 14px 30px rgba(225, 29, 47, 0.36), 0 0 0 5px rgba(242, 194, 48, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.28);
 }
 
 .workout-calendar {
@@ -963,11 +963,12 @@ button:not(.primary):not(.back-button) {
 }
 
 .calendar-day.today {
-    background: linear-gradient(135deg, rgba(225, 29, 47, 0.92), rgba(242, 194, 48, 0.78));
-    border-color: rgba(242, 194, 48, 0.96);
+    /* Strong yellow ring + subtle red inner tone so today is very visible */
+    background: linear-gradient(135deg, rgba(225, 29, 47, 0.9), rgba(40, 16, 12, 0.92));
+    border: 2px solid rgba(242, 194, 48, 0.98);
     color: #fff;
-    font-weight: 800;
-    box-shadow: 0 16px 36px rgba(225, 29, 47, 0.36), 0 0 0 6px rgba(242, 194, 48, 0.06);
+    font-weight: 900;
+    box-shadow: 0 14px 34px rgba(225, 29, 47, 0.36), 0 0 0 8px rgba(242, 194, 48, 0.14);
     transform: translateY(-1px);
 }
 
