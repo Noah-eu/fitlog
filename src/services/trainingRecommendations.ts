@@ -120,11 +120,13 @@ export function buildTodayRecommendations(
     const lastUsedDateByExercise = buildLastUsedDateMap(entries)
     const allBuckets = new Map<string, TrainingRecommendation[]>()
     const freshBuckets = new Map<string, TrainingRecommendation[]>()
+    const excludedSet = new Set((preferences.excludedExerciseIds ?? []).map((id) => id))
 
     for (const category of orderedCategories) {
         const recommendations = catalog
             .filter((exercise) => exercise.category === category)
             .filter((exercise) => matchesSubcategoryPreference(exercise, preferences))
+            .filter((exercise) => !excludedSet.has(resolveExerciseId(exercise.id)))
             .map((exercise) => {
                 const lastUsedDateKey = lastUsedDateByExercise.get(exercise.id) ?? null
                 return {

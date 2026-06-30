@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { findExerciseById, getEquivalentExerciseIds } from '../data/exercises'
+import { findExerciseById, getEquivalentExerciseIds, resolveExerciseId } from '../data/exercises'
+import { getTrainingPreferences, subscribeToTrainingPreferences, saveTrainingPreferences } from '../services/trainingPreferencesStorage'
 import type { WorkoutEntry } from '../types/workout'
 import { deleteEntry, getWorkoutDateKey, saveEntry, subscribeToEntries, toStoredWorkoutDate, updateEntry } from '../services/workoutStorage'
 import BackButton from '../components/BackButton'
@@ -76,6 +77,9 @@ export default function ExerciseDetailPage() {
     const [editingId, setEditingId] = useState<string | null>(null)
     const [saveError, setSaveError] = useState<string | null>(null)
 
+    const [trainingPreferences, setTrainingPreferences] = useState(getTrainingPreferences())
+    const [prefSaving, setPrefSaving] = useState(false)
+
 
     useEffect(() => {
         if (!ex.id) return
@@ -86,6 +90,10 @@ export default function ExerciseDetailPage() {
             setEntries(allEntries.filter((entry) => relatedExerciseIds.has(entry.exerciseId)))
         })
     }, [ex.id])
+
+    useEffect(() => {
+        return subscribeToTrainingPreferences(setTrainingPreferences)
+    }, [])
 
     const last = useMemo(() => entries[0], [entries])
     const chartPoints = useMemo(() => getDailyMaxWeightPoints(entries), [entries])
@@ -176,6 +184,31 @@ export default function ExerciseDetailPage() {
                     <p><strong>Doporučené série:</strong> {ex.recommendedSets}</p>
 
                     <form className="entry-form" onSubmit={handleSave}>
+                        <div style={{ marginBottom: 8 }}>
+                            {(() => {
+                                const canonicalId = resolveExerciseId(ex.id)
+                                const excluded = (trainingPreferences?.excludedExerciseIds ?? []).includes(canonicalId)
+                                return (
+                                    <button
+                                        type="button"
+                                        className="selectable-chip"
+                                        onClick={async () => {
+                                            if (prefSaving) return
+                                            setPrefSaving(true)
+                                            try {
+                                                const current = trainingPreferences?.excludedExerciseIds ?? []
+                                                const next = current.includes(canonicalId) ? current.filter((id) => id !== canonicalId) : [...current, canonicalId]
+                                                await saveTrainingPreferences({ excludedExerciseIds: next })
+                                            } finally {
+                                                setPrefSaving(false)
+                                            }
+                                        }}
+                                    >
+                                        {excluded ? 'Znovu zařadit do tréninkového plánu' : 'Nezařazovat do tréninkového plánu'}
+                                    </button>
+                                )
+                            })()}
+                        </div>
                         <label>
                             Datum
                             <input type="date" value={date} onChange={(ev) => setDate(ev.target.value)} />

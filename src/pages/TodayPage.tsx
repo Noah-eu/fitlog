@@ -159,10 +159,14 @@ export default function TodayPage() {
                 const exercise = findExerciseById(exerciseId)
                 if (!exercise) return null
 
+                const canonicalId = resolveExerciseId(exercise.id)
+                const excluded = (trainingPreferences?.excludedExerciseIds ?? []).includes(canonicalId)
+
                 return {
                     exercise,
                     completed: completedExerciseIds.has(exercise.id),
                     lastUsedDateKey: lastUsedDateByExercise.get(exercise.id) ?? null,
+                    excluded,
                 }
             })
             .filter((item): item is NonNullable<typeof item> => item !== null)
@@ -296,6 +300,7 @@ export default function TodayPage() {
                                             </span>
                                             <h4>{item.exercise.name}</h4>
                                             <p>{formatRecommendationUsage(item.lastUsedDateKey)}</p>
+                                                {item.excluded ? <div className="small muted">Vyřazeno z budoucích plánů</div> : null}
                                             <div className={`recommendation-status${item.completed ? ' done' : ''}`}>
                                                 {item.completed ? 'Dnes zapsáno' : 'Čeká na splnění'}
                                             </div>

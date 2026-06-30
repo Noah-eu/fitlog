@@ -41,6 +41,7 @@ function createDefaultTrainingPreferences(): TrainingPreferences {
     return {
         style: 'fullBody',
         enabledCategories: [...DEFAULT_TRAINING_CATEGORIES],
+        excludedExerciseIds: [],
         targetExerciseCount: 6,
         avoidRecentlyUsedDays: 3,
         updatedAt: new Date().toISOString(),
@@ -51,11 +52,14 @@ function normalizeTrainingPreferences(value: Partial<TrainingPreferences> | null
     const defaults = createDefaultTrainingPreferences()
     const normalizedEnabledCategories = uniqueStrings(value?.enabledCategories)
     const hasEnabledCategoriesField = Array.isArray(value?.enabledCategories)
+    const normalizedExcludedExerciseIds = uniqueStrings((value as any)?.excludedExerciseIds)
+    const hasExcludedExerciseIdsField = Array.isArray((value as any)?.excludedExerciseIds)
 
     return {
         style: value?.style === 'fullBody' ? value.style : defaults.style,
         enabledCategories: hasEnabledCategoriesField ? normalizedEnabledCategories : defaults.enabledCategories,
         enabledSubcategoriesByCategory: normalizeEnabledSubcategories(value?.enabledSubcategoriesByCategory),
+        excludedExerciseIds: hasExcludedExerciseIdsField ? normalizedExcludedExerciseIds : defaults.excludedExerciseIds,
         targetExerciseCount: clamp(
             typeof value?.targetExerciseCount === 'number' && Number.isFinite(value.targetExerciseCount) ? Math.round(value.targetExerciseCount) : defaults.targetExerciseCount,
             3,
