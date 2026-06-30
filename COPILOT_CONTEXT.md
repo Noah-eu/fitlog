@@ -29,9 +29,11 @@ Local source map (read these next when editing UI or routing)
  - src/services/workoutStorage.ts
  - src/services/trainingPreferencesStorage.ts
  - src/services/trainingRecommendations.ts
+ - src/services/trainingDayPlanStorage.ts
  - src/pages/ExerciseDetailPage.tsx
  - src/types/body.ts
  - src/types/trainingPreferences.ts
+ - src/types/trainingDayPlan.ts
  - src/services/bodyMeasurementStorage.ts
  - src/pages/MyBodyPage.tsx
 

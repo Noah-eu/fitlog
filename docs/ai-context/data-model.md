@@ -74,6 +74,21 @@ Training preferences storage
 - Ownership: only the authenticated user may read or write preferences under their own `userId` path.
 - Local fallback: training preferences may remain in browser localStorage only when Firebase Auth/Firestore is unavailable.
 
+Training day plan shape:
+- dateKey: string
+- exerciseIds: string[]
+- generatedAt: string (ISO timestamp)
+- source: 'auto' | 'manual'
+- preferencesSnapshot?:
+  - enabledCategories: string[]
+  - targetExerciseCount: number
+  - avoidRecentlyUsedDays: number
+
+Training day plan storage
+- Firestore path: `users/{userId}/trainingPlans/{dateKey}`
+- Ownership: only the authenticated user may read or write the current user's daily plan.
+- Local fallback: daily plans may remain in browser localStorage only when Firebase Auth/Firestore is unavailable.
+
 - `users/{userId}/workoutEntries/{entryId}`
   - id: string
   - exerciseId: string

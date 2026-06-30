@@ -261,9 +261,19 @@ export async function saveTrainingPreferences(input: Partial<TrainingPreferences
 
     if (canUseFirestoreTrainingPreferences()) {
         const userId = getActiveUserId() as string
-        await setDoc(doc(db!, 'users', userId, 'settings', SETTINGS_DOC_ID), payload)
-        emitTrainingPreferences(nextPreferences)
-        return nextPreferences
+        try {
+            await setDoc(doc(db!, 'users', userId, 'settings', SETTINGS_DOC_ID), payload)
+            emitTrainingPreferences(nextPreferences)
+            return nextPreferences
+        } catch (error) {
+            emitTrainingPreferences(nextPreferences, { persistLocal: true })
+
+            if (error instanceof Error && /Missing or insufficient permissions/i.test(error.message)) {
+                throw new Error('Uložení do Firestore bylo odmítnuto. Zkontroluj nasazená Firebase pravidla nebo spusť firebase deploy --only firestore:rules.')
+            }
+
+            throw error
+        }
     }
 
     emitTrainingPreferences(nextPreferences, { persistLocal: true })

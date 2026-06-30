@@ -195,7 +195,7 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="settings-meta">
-                        <span>Aktivní kategorie: {trainingPreferences.enabledCategories.join(', ') || 'žádné'}</span>
+                        <span>Aktivní kategorie: {draftPreferences.enabledCategories.join(', ') || 'žádné'}</span>
                         <span>Naposledy uloženo: {formatUpdatedAt(trainingPreferences.updatedAt)}</span>
                     </div>
 
