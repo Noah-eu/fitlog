@@ -17,56 +17,87 @@ function parseDateKey(dateKey: string) {
     const [year, month, day] = dateKey.split('-').map(Number)
     return new Date(year, month - 1, day, 12)
 }
-
 function formatDateKey(dateKey: string) {
     return parseDateKey(dateKey).toLocaleDateString('cs-CZ')
 }
 
-function last7DaysCount(entries: { date: string }[]) {
+function isDateKeyWithinLastDays(dateKey: string, days: number) {
     const today = parseDateKey(toDateKey(new Date()))
     const cutoff = new Date(today)
-    cutoff.setDate(cutoff.getDate() - 6)
-    return entries.filter((entry) => {
-        const entryDay = parseDateKey(getWorkoutDateKey(entry.date))
-        return entryDay >= cutoff && entryDay <= today
-    }).length
+    cutoff.setDate(cutoff.getDate() - (days - 1))
+    const entryDay = parseDateKey(dateKey)
+    return entryDay >= cutoff && entryDay <= today
 }
 
-function buildPerformanceOverview(entries: WorkoutEntry[]) {
-    const byExercise = new Map<string, { latest: WorkoutEntry; bestWeight?: number }>()
+function buildExerciseNameMap() {
+    return new Map(exercises.map((exercise) => [exercise.id, exercise.name]))
+}
+
+function buildActivitySummary(entries: WorkoutEntry[]) {
+    const uniqueDays = new Set(entries.map((entry) => getWorkoutDateKey(entry.date)))
+    const sortedUniqueDays = Array.from(uniqueDays).sort((left, right) => right.localeCompare(left))
+
+    return {
+        trainingDaysLast7: sortedUniqueDays.filter((dayKey) => isDateKeyWithinLastDays(dayKey, 7)).length,
+        trainingDaysLast30: sortedUniqueDays.filter((dayKey) => isDateKeyWithinLastDays(dayKey, 30)).length,
+        lastWorkoutDay: sortedUniqueDays[0] ?? null,
+        entriesLast7: entries.filter((entry) => isDateKeyWithinLastDays(getWorkoutDateKey(entry.date), 7)).length,
+    }
+}
+
+function buildPersonalRecords(entries: WorkoutEntry[]) {
+    const byExercise = new Map<string, WorkoutEntry>()
 
     entries.forEach((entry) => {
-        const existing = byExercise.get(entry.exerciseId)
-        const bestWeight = typeof entry.weight === 'number'
-            ? Math.max(existing?.bestWeight ?? Number.NEGATIVE_INFINITY, entry.weight)
-            : existing?.bestWeight
+        if (typeof entry.weight !== 'number' || !Number.isFinite(entry.weight)) return
 
-        if (existing) {
-            byExercise.set(entry.exerciseId, {
-                latest: existing.latest,
-                bestWeight: Number.isFinite(bestWeight ?? Number.NaN) ? bestWeight : undefined,
-            })
+        const existing = byExercise.get(entry.exerciseId)
+        if (!existing) {
+            byExercise.set(entry.exerciseId, entry)
             return
         }
 
-        byExercise.set(entry.exerciseId, {
-            latest: entry,
-            bestWeight: typeof entry.weight === 'number' ? entry.weight : undefined,
-        })
+        const existingOrderKey = existing.updatedAt ?? existing.createdAt ?? existing.date
+        const nextOrderKey = entry.updatedAt ?? entry.createdAt ?? entry.date
+        const shouldReplace = entry.weight > (existing.weight ?? Number.NEGATIVE_INFINITY)
+            || (entry.weight === existing.weight && nextOrderKey.localeCompare(existingOrderKey) > 0)
+
+        if (shouldReplace) {
+            byExercise.set(entry.exerciseId, entry)
+        }
     })
 
-    return Array.from(byExercise.entries())
-        .map(([exerciseId, summary]) => {
-            const exercise = exercises.find((item) => item.id === exerciseId)
-            return {
-                exerciseId,
-                name: exercise?.name ?? 'Neznámý cvik',
-                category: exercise?.category ?? 'Bez kategorie',
-                latest: summary.latest,
-                bestWeight: summary.bestWeight,
-            }
+    const exerciseNameById = buildExerciseNameMap()
+
+    return Array.from(byExercise.values())
+        .map((entry) => ({
+            exerciseId: entry.exerciseId,
+            exerciseName: exerciseNameById.get(entry.exerciseId) ?? 'Neznámý cvik',
+            entry,
+        }))
+        .sort((left, right) => {
+            const weightDelta = (right.entry.weight ?? 0) - (left.entry.weight ?? 0)
+            if (weightDelta !== 0) return weightDelta
+            const rightOrderKey = right.entry.updatedAt ?? right.entry.createdAt ?? right.entry.date
+            const leftOrderKey = left.entry.updatedAt ?? left.entry.createdAt ?? left.entry.date
+            return rightOrderKey.localeCompare(leftOrderKey)
         })
-        .sort((a, b) => b.latest.date.localeCompare(a.latest.date) || b.latest.createdAt.localeCompare(a.latest.createdAt))
+        .slice(0, 5)
+}
+
+function formatRecordDetail(entry: WorkoutEntry) {
+    const reps = typeof entry.reps === 'number' && Number.isFinite(entry.reps) ? entry.reps : '-'
+    const sets = typeof entry.sets === 'number' && Number.isFinite(entry.sets) ? entry.sets : '-'
+    return `${reps} opakování • ${sets} série`
+}
+
+function formatBodyMetric(value: number | null | undefined, suffix: string) {
+    return typeof value === 'number' && Number.isFinite(value) ? `${value} ${suffix}` : '-'
+}
+
+function formatLastWorkoutSummary(lastWorkoutDay: string | null) {
+    if (!lastWorkoutDay) return 'Zatím nemáš zapsaný žádný trénink.'
+    return `Poslední trénink: ${formatDateKey(lastWorkoutDay)}`
 }
 
 export default function TodayPage() {
@@ -83,73 +114,72 @@ export default function TodayPage() {
     }, [])
 
     const latestMeasurement = measurements[0]
-    const weekCount = last7DaysCount(entries)
-    const performanceOverview = useMemo(() => buildPerformanceOverview(entries), [entries])
+    const activitySummary = useMemo(() => buildActivitySummary(entries), [entries])
+    const personalRecords = useMemo(() => buildPersonalRecords(entries), [entries])
 
     return (
         <div className="page">
-            <h1>FitLog / Dnes</h1>
-
             <div className="dashboard">
-                <section className="card dashboard-hero">
+                <section className="card dashboard-hero dashboard-overview-hero">
                     <div>
-                        <div className="muted">Moje výkony</div>
-                        <h2>Přehled aktuálních vah a posledních výkonů</h2>
+                        <div className="muted">FitLog / Dnes</div>
+                        <h1>Přehled tréninku a progresu</h1>
+                        <p className="dashboard-subtitle">Rychlý přehled aktivity, rekordů a dalšího kroku pro dnešní trénink.</p>
                     </div>
-                    <div className="dashboard-week-summary">
-                        <strong>{weekCount}</strong>
-                        <span>záznamů za posledních 7 dní</span>
-                    </div>
+                    <div className="dashboard-status-pill">{formatLastWorkoutSummary(activitySummary.lastWorkoutDay)}</div>
                 </section>
-
-                <div className="dashboard-actions">
-                    <button onClick={() => navigate('/exercises')} className="primary">Začít cvičit</button>
-                    <button onClick={() => navigate('/history')}>Zobrazit deník</button>
-                    <button onClick={() => navigate('/body')}>Přidat měření</button>
-                </div>
 
                 <section className="dashboard-section">
                     <div className="section-heading">
-                        <h3>Moje výkony</h3>
-                        <span>{performanceOverview.length} cviků se záznamem</span>
+                        <h3>Aktivita</h3>
+                        <span>Poslední týdny bez duplicitních dnů</span>
                     </div>
 
-                    {performanceOverview.length === 0 ? (
+                    <div className="dashboard-stat-grid">
+                        <article className="card dashboard-stat-card">
+                            <span>Tréninkové dny za 7 dní</span>
+                            <strong>{activitySummary.trainingDaysLast7}</strong>
+                        </article>
+                        <article className="card dashboard-stat-card">
+                            <span>Tréninkové dny za 30 dní</span>
+                            <strong>{activitySummary.trainingDaysLast30}</strong>
+                        </article>
+                        <article className="card dashboard-stat-card">
+                            <span>Poslední tréninkový den</span>
+                            <strong>{activitySummary.lastWorkoutDay ? formatDateKey(activitySummary.lastWorkoutDay) : 'Zatím nic'}</strong>
+                        </article>
+                        <article className="card dashboard-stat-card">
+                            <span>Zapsané výkony za 7 dní</span>
+                            <strong>{activitySummary.entriesLast7}</strong>
+                        </article>
+                    </div>
+                </section>
+
+                <section className="dashboard-section">
+                    <div className="section-heading">
+                        <h3>Moje rekordy</h3>
+                        <span>Top 5 nejtěžších výkonů</span>
+                    </div>
+
+                    {personalRecords.length === 0 ? (
                         <div className="card empty-state-card">
-                            <p>Ještě tu nejsou žádné uložené výkony. Otevřete cvičení a zapište první sérii, ať se začne budovat přehled.</p>
+                            <p>Rekordy se zobrazí po zapsání prvních výkonů.</p>
                         </div>
                     ) : (
-                        <div className="performance-list">
-                            {performanceOverview.map((item) => (
-                                <article key={item.exerciseId} className="card performance-card">
-                                    <div className="performance-head">
+                        <div className="record-list">
+                            {personalRecords.map((record) => (
+                                <article key={record.exerciseId} className="card record-card">
+                                    <div className="record-head">
                                         <div>
-                                            <h4>{item.name}</h4>
-                                            <div className="muted">{item.category}</div>
+                                            <h4>{record.exerciseName}</h4>
+                                            <span>{formatRecordDetail(record.entry)}</span>
                                         </div>
-                                        <div className="performance-date">{formatDateKey(getWorkoutDateKey(item.latest.date))}</div>
+                                        <strong>{record.entry.weight} kg</strong>
                                     </div>
-
-                                    <div className="performance-grid">
-                                        <div>
-                                            <span>Poslední výkon</span>
-                                            <strong>{item.latest.weight ?? '-'} kg</strong>
-                                        </div>
-                                        <div>
-                                            <span>Opakování a série</span>
-                                            <strong>{item.latest.sets ?? '-'}×{item.latest.reps ?? '-'}</strong>
-                                        </div>
-                                        <div>
-                                            <span>Obtížnost</span>
-                                            <strong>{item.latest.difficulty ?? '-'}</strong>
-                                        </div>
-                                        <div>
-                                            <span>Nejvyšší váha</span>
-                                            <strong>{item.bestWeight ?? '-'} kg</strong>
-                                        </div>
+                                    <div className="record-foot">
+                                        <span>{formatDateKey(getWorkoutDateKey(record.entry.date))}</span>
+                                        <span>{record.entry.difficulty ?? 'Obtížnost neuvedena'}</span>
                                     </div>
-
-                                    {item.latest.note ? <p className="small">Poznámka: {item.latest.note}</p> : null}
                                 </article>
                             ))}
                         </div>
@@ -157,31 +187,40 @@ export default function TodayPage() {
                 </section>
 
                 {latestMeasurement ? (
-                    <section className="card body-summary-card">
+                    <section className="card dashboard-body-summary">
                         <div className="section-heading">
                             <h3>Moje tělo</h3>
-                            <span>{new Date(latestMeasurement.date).toLocaleDateString('cs-CZ')}</span>
+                            <span>{formatDateKey(getWorkoutDateKey(latestMeasurement.date))}</span>
                         </div>
-                        <div className="performance-grid body-summary-grid">
+                        <div className="dashboard-body-grid">
                             <div>
                                 <span>Váha</span>
-                                <strong>{latestMeasurement.bodyWeight ?? '-'} kg</strong>
+                                <strong>{formatBodyMetric(latestMeasurement.bodyWeight, 'kg')}</strong>
                             </div>
                             <div>
                                 <span>Pas</span>
-                                <strong>{latestMeasurement.waist ?? '-'} cm</strong>
+                                <strong>{formatBodyMetric(latestMeasurement.waist, 'cm')}</strong>
                             </div>
                             <div>
                                 <span>Hrudník</span>
-                                <strong>{latestMeasurement.chest ?? '-'} cm</strong>
-                            </div>
-                            <div>
-                                <span>Stehna</span>
-                                <strong>{latestMeasurement.thighs ?? '-'} cm</strong>
+                                <strong>{formatBodyMetric(latestMeasurement.chest, 'cm')}</strong>
                             </div>
                         </div>
                     </section>
                 ) : null}
+
+                <section className="dashboard-section">
+                    <div className="section-heading">
+                        <h3>Co otevřít dál</h3>
+                        <span>Pouze reálné akce</span>
+                    </div>
+
+                    <div className="dashboard-actions">
+                        <button type="button" onClick={() => navigate('/exercises')} className="primary">Začít cvičit</button>
+                        <button type="button" onClick={() => navigate('/history')}>Otevřít deník</button>
+                        <button type="button" onClick={() => navigate('/body')}>Moje tělo</button>
+                    </div>
+                </section>
             </div>
         </div>
     )

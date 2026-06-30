@@ -4,13 +4,12 @@ Primary screens and key components
 
 - Today / Dashboard
  - Today / Dashboard
-  - `Moje výkony` overview for every exercise with saved workout data
-  - Latest performance per exercise (weight, reps, sets, difficulty, date)
-  - Optional best/heaviest recorded weight per exercise
-  - Latest body measurement summary (weight, waist, chest, date)
-  - Count of workout entries in the last 7 days
-  - Quick action buttons: `Cvičení`, `Deník`, `Moje tělo`
-  - Empty-state message when no data present
+  - Header with `FitLog / Dnes` and short training/progress subtitle
+  - Activity summary cards for unique training days in the last 7 and 30 days, last training day, and workout entry count in the last 7 days
+  - `Moje rekordy` section showing computed top 5 highest recorded weights by exercise with reps, sets, and date
+  - Compact latest body summary (body weight, waist, chest, date) when measurements exist
+  - Real quick actions only: `Začít cvičit`, `Otevřít deník`, `Moje tělo`
+  - Empty states for missing workouts or records
 
 - Exercises
   - List grouped by `muscleGroup`
