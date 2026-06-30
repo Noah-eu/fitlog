@@ -226,6 +226,7 @@ export default function TodayPage() {
                     <div>
                         <div className="muted">FitLog / Dnes</div>
                         <h1>Přehled tréninku a progresu</h1>
+                        <div className="muted">{new Date().toLocaleDateString('cs-CZ')}</div>
                         <p className="dashboard-subtitle">Rychlý přehled aktivity, rekordů a dalšího kroku pro dnešní trénink.</p>
                     </div>
                     <div className="dashboard-status-pill">{formatLastWorkoutSummary(activitySummary.lastWorkoutDay)}</div>
@@ -283,27 +284,27 @@ export default function TodayPage() {
                                 <span>{completedCount === storedExercises.length ? 'Dnešní plán hotový' : 'Splněné cviky zůstávají na stejném místě.'}</span>
                             </div>
                             <div className="recommendation-list">
-                            {storedExercises.map((item) => (
-                                <article key={item.exercise.id} className={`card recommendation-card${item.completed ? ' completed' : ''}`}>
-                                    <div className="recommendation-thumb">
-                                        {item.exercise.imageUrl ? <img src={item.exercise.imageUrl} alt={item.exercise.name} /> : null}
-                                    </div>
-                                    <div className="recommendation-meta">
-                                        <span className="recommendation-category">
-                                            {item.exercise.category}
-                                            {item.exercise.subcategory ? ` • ${item.exercise.subcategory}` : ''}
-                                        </span>
-                                        <h4>{item.exercise.name}</h4>
-                                        <p>{formatRecommendationUsage(item.lastUsedDateKey)}</p>
-                                        <div className={`recommendation-status${item.completed ? ' done' : ''}`}>
-                                            {item.completed ? 'Dnes zapsáno' : 'Čeká na splnění'}
+                                {storedExercises.map((item) => (
+                                    <article key={item.exercise.id} className={`card recommendation-card${item.completed ? ' completed' : ''}`}>
+                                        <div className="recommendation-thumb">
+                                            {item.exercise.imageUrl ? <img src={item.exercise.imageUrl} alt={item.exercise.name} /> : null}
                                         </div>
-                                    </div>
-                                    <button type="button" onClick={() => navigate(`/exercises/${item.exercise.id}`)}>
-                                        Otevřít
-                                    </button>
-                                </article>
-                            ))}
+                                        <div className="recommendation-meta">
+                                            <span className="recommendation-category">
+                                                {item.exercise.category}
+                                                {item.exercise.subcategory ? ` • ${item.exercise.subcategory}` : ''}
+                                            </span>
+                                            <h4>{item.exercise.name}</h4>
+                                            <p>{formatRecommendationUsage(item.lastUsedDateKey)}</p>
+                                            <div className={`recommendation-status${item.completed ? ' done' : ''}`}>
+                                                {item.completed ? 'Dnes zapsáno' : 'Čeká na splnění'}
+                                            </div>
+                                        </div>
+                                        <button type="button" onClick={() => navigate(`/exercises/${item.exercise.id}`)}>
+                                            Otevřít
+                                        </button>
+                                    </article>
+                                ))}
                             </div>
                         </>
                     )}

@@ -53,9 +53,10 @@ export default function WorkoutHistoryPage() {
 
             setEntries(nextEntries)
             setSelectedDateKey((currentDateKey) => {
+                // If the user has explicitly selected a date (and it still has workouts), keep it.
                 if (workoutDays.has(currentDateKey)) return currentDateKey
-                if (workoutDays.has(todayKey)) return todayKey
-                return nextEntries[0] ? getWorkoutDateKey(nextEntries[0].date) : todayKey
+                // Default to today as the primary highlighted day — do not auto-select the last workout day.
+                return todayKey
             })
         })
     }, [])
