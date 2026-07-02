@@ -174,6 +174,7 @@ export default function TodayPage() {
                 }
             })
             .filter((item): item is NonNullable<typeof item> => item !== null)
+            .filter((item) => !item.excluded)
     }, [todayPlan, entries, completedExerciseIds])
     const completedCount = storedExercises.filter((item) => item.completed).length
 
@@ -240,6 +241,62 @@ export default function TodayPage() {
             cancelled = true
         }
     }, [todayPlan, planSaving])
+
+    useEffect(() => {
+        if (!todayPlan || !trainingPreferences) return
+        if (planSaving) return
+
+        const excludedSet = new Set(
+            (trainingPreferences.excludedExerciseIds ?? []).map((id) => resolveExerciseId(id)),
+        )
+        const hasExcluded = todayPlan.exerciseIds.some((id) => excludedSet.has(resolveExerciseId(id)))
+        if (!hasExcluded) return
+
+        const validIds = todayPlan.exerciseIds.filter((id) => !excludedSet.has(resolveExerciseId(id)))
+        const targetCount = trainingPreferences.targetExerciseCount
+        const missingCount = targetCount - validIds.length
+
+        async function doRepair() {
+            setPlanSaving(true)
+            try {
+                let repairedIds = [...validIds]
+
+                if (missingCount > 0) {
+                    const recentPlans = await getRecentTrainingPlans(3)
+                    const pastPlans = recentPlans.filter((plan) => plan.dateKey !== todayDateKey)
+                    const recentReferencePlans = [todayPlan, ...pastPlans]
+
+                    const recommendations = buildFullBodyVariantRecommendations(
+                        exercises,
+                        entries,
+                        trainingPreferences,
+                        todayPlan.variant,
+                        recentReferencePlans,
+                    )
+
+                    const validIdSet = new Set(repairedIds.map((id) => resolveExerciseId(id)))
+                    const fillers = recommendations
+                        .filter((r) => !validIdSet.has(resolveExerciseId(r.exercise.id)))
+                        .map((r) => r.exercise.id)
+                        .slice(0, missingCount)
+
+                    repairedIds = [...repairedIds, ...fillers]
+                }
+
+                await saveTodayTrainingPlan(repairedIds, {
+                    source: todayPlan.source,
+                    variant: todayPlan.variant,
+                    preferencesSnapshot: todayPlan.preferencesSnapshot,
+                })
+            } catch (error) {
+                console.warn('[TodayPage] failed to repair plan', error)
+            } finally {
+                setPlanSaving(false)
+            }
+        }
+
+        doRepair()
+    }, [todayPlan, trainingPreferences])
 
     async function handleRegeneratePlan() {
         setPlanSaving(true)
@@ -334,7 +391,6 @@ export default function TodayPage() {
                                             </span>
                                             <h4>{item.exercise.name}</h4>
                                             <p>{formatRecommendationUsage(item.lastUsedDateKey)}</p>
-                                            {item.excluded ? <div className="small muted">Vyřazeno z budoucích plánů</div> : null}
                                             <div className={`recommendation-status${item.completed ? ' done' : ''}`}>
                                                 {item.completed ? 'Dnes zapsáno' : 'Čeká na splnění'}
                                             </div>
