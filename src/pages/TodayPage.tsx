@@ -249,7 +249,11 @@ export default function TodayPage() {
         const excludedSet = new Set(
             (trainingPreferences.excludedExerciseIds ?? []).map((id) => resolveExerciseId(id)),
         )
-        const validIds = todayPlan.exerciseIds.filter((id) => !excludedSet.has(resolveExerciseId(id)))
+        const validIds = todayPlan.exerciseIds.filter((id) => {
+            if (excludedSet.has(resolveExerciseId(id))) return false
+            if (!findExerciseById(id)) return false
+            return true
+        })
         const targetCount = trainingPreferences.targetExerciseCount
         const missingCount = targetCount - validIds.length
 
