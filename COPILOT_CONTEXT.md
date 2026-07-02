@@ -57,3 +57,41 @@ Key rules to enforce in code and design
 Notes for future sessions
 - Use these docs to reconstruct context quickly.
 - Add any newly created long-lived design docs to docs/ai-context and update this file.
+
+AI development workflow / Cost-saving workflow
+
+Primary development agent
+- Kilo Code in VS Code
+
+Provider
+- OpenRouter
+
+Primary model for normal work
+- OpenRouter / DeepSeek V4 Flash
+
+Current Kilo global config
+- Default Model: OpenRouter / DeepSeek V4 Flash
+- Code: OpenRouter / DeepSeek V4 Flash
+- Debug: OpenRouter / DeepSeek V4 Flash
+- Small Model: OpenRouter / DeepSeek V4 Flash
+- Autocomplete model: Not set
+- Ask / Plan / Orchestrator / Subagent: Not set
+
+Copilot / GPT expensive models (fallback only)
+- Complex bugs
+- Architecture
+- Security
+- Final review
+- When the cheap model fails
+
+Rules for normal FitLog changes
+- Changes must be small and scoped.
+- Always read APP_PLAN.md, COPILOT_CONTEXT.md, and docs/ai-context/* first.
+- Do not scan the whole repo unless the documented paths are insufficient.
+- Do not enable autocomplete model until token usage is verified.
+
+After making changes
+- Run build and tests.
+- Inspect the diff.
+- Confirm node_modules, dist, .env, and .env.local are not staged.
+- Commit and push only if the working tree is clean.
