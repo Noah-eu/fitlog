@@ -249,12 +249,11 @@ export default function TodayPage() {
         const excludedSet = new Set(
             (trainingPreferences.excludedExerciseIds ?? []).map((id) => resolveExerciseId(id)),
         )
-        const hasExcluded = todayPlan.exerciseIds.some((id) => excludedSet.has(resolveExerciseId(id)))
-        if (!hasExcluded) return
-
         const validIds = todayPlan.exerciseIds.filter((id) => !excludedSet.has(resolveExerciseId(id)))
         const targetCount = trainingPreferences.targetExerciseCount
         const missingCount = targetCount - validIds.length
+
+        if (missingCount <= 0 && validIds.length === todayPlan.exerciseIds.length) return
 
         async function doRepair() {
             setPlanSaving(true)
@@ -266,10 +265,11 @@ export default function TodayPage() {
                     const pastPlans = recentPlans.filter((plan) => plan.dateKey !== todayDateKey)
                     const recentReferencePlans = [todayPlan, ...pastPlans]
 
+                    const relaxedPrefs = { ...trainingPreferences, targetExerciseCount: Math.min(targetCount + missingCount, 20) }
                     const recommendations = buildFullBodyVariantRecommendations(
                         exercises,
                         entries,
-                        trainingPreferences,
+                        relaxedPrefs,
                         todayPlan.variant,
                         recentReferencePlans,
                     )
