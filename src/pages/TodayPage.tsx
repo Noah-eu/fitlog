@@ -211,6 +211,10 @@ export default function TodayPage() {
     useEffect(() => {
         if (todayPlan || planSaving) return
 
+        if (process.env.NODE_ENV === 'development') {
+            console.warn('[TodayPage] generating initial plan for today')
+        }
+
         let cancelled = false
         setPlanSaving(true)
         setPlanError(null)
@@ -235,7 +239,7 @@ export default function TodayPage() {
         return () => {
             cancelled = true
         }
-    }, [todayPlan, planSaving, entries, trainingPreferences])
+    }, [todayPlan, planSaving])
 
     async function handleRegeneratePlan() {
         setPlanSaving(true)
